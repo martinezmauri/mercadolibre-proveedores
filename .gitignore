@@ -1,0 +1,15 @@
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+build/
+.vercel/
+
+# Misc
+.DS_Store
+*.log
