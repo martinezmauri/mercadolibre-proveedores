@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,11 +27,13 @@ type FormularioProveedorProps = {
   trigger: React.ReactNode;
 };
 
+type ProveedorFormInput = z.input<typeof proveedorSchema>;
+
 export function FormularioProveedor({ categorias, proveedor, trigger }: FormularioProveedorProps) {
   const [open, setOpen] = useState(false);
 
-  const form = useForm<ProveedorFormValues>({
-    resolver: zodResolver(proveedorSchema) as any,
+  const form = useForm<ProveedorFormInput, unknown, ProveedorFormValues>({
+    resolver: zodResolver(proveedorSchema),
     defaultValues: {
       nombre: proveedor?.nombre ?? '',
       url: proveedor?.url ?? '',
@@ -101,7 +104,7 @@ export function FormularioProveedor({ categorias, proveedor, trigger }: Formular
                     <Input
                       type="number"
                       {...field}
-                      value={field.value ?? ''}
+                      value={typeof field.value === 'number' || typeof field.value === 'string' ? field.value : ''}
                       onChange={(e) => field.onChange(e.target.value === '' ? null : e.target.value)}
                     />
                   </FormControl>
@@ -131,7 +134,7 @@ export function FormularioProveedor({ categorias, proveedor, trigger }: Formular
                   <FormControl>
                     <SelectorCategorias
                       categorias={categorias}
-                      seleccionadas={field.value}
+                      seleccionadas={field.value ?? []}
                       onChange={field.onChange}
                     />
                   </FormControl>
