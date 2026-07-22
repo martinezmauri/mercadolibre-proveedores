@@ -100,7 +100,15 @@ export const proveedoresService = {
 
     if (updateError) throw new Error(`No se pudo actualizar el proveedor: ${updateError.message}`);
 
-    await supabase.from('proveedor_categorias').delete().eq('proveedor_id', id);
+    const { error: deleteError } = await supabase
+      .from('proveedor_categorias')
+      .delete()
+      .eq('proveedor_id', id);
+
+    if (deleteError) {
+      throw new Error(`No se pudieron eliminar las categorías anteriores: ${deleteError.message}`);
+    }
+
     await asignarCategorias(supabase, id, input.categoriaIds);
 
     return obtenerPorId(supabase, id);

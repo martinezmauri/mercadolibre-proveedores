@@ -146,6 +146,25 @@ describe('proveedoresService', () => {
       expect(result.nombre).toBe('Mayorista Uno Actualizado');
       expect(result.categorias).toEqual([{ id: 'c2', nombre: 'cocina' }]);
     });
+
+    it('lanza un error legible si falla la eliminación de categorías anteriores', async () => {
+      const updateResult = createQueryMock({ data: null, error: null });
+      const deleteCategoriasResult = createQueryMock({ data: null, error: { message: 'fk violation' } });
+
+      const from = vi.fn().mockReturnValueOnce(updateResult).mockReturnValueOnce(deleteCategoriasResult);
+
+      mockedCreateClient.mockReturnValue({ from });
+
+      await expect(
+        proveedoresService.actualizar('p1', {
+          nombre: 'Mayorista Uno Actualizado',
+          url: 'https://mayorista-uno.com',
+          compraMinima: 150,
+          whatsapp: '5491122334455',
+          categoriaIds: ['c2'],
+        })
+      ).rejects.toThrow('No se pudieron eliminar las categorías anteriores: fk violation');
+    });
   });
 
   describe('eliminar', () => {
