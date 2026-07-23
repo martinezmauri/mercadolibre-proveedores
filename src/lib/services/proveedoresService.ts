@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { throwOnSupabaseError } from '@/lib/services/supabaseError';
 import type { Proveedor, ProveedorInput } from '@/types/proveedor';
 
 type SupabaseServerClient = ReturnType<typeof createSupabaseServerClient>;
@@ -37,7 +38,7 @@ async function obtenerPorId(supabase: SupabaseServerClient, id: string): Promise
     .eq('id', id)
     .single();
 
-  if (error) throw new Error(`No se pudo leer el proveedor: ${error.message}`);
+  throwOnSupabaseError(error, 'No se pudo leer el proveedor');
   return mapRow(data as unknown as ProveedorRow);
 }
 
@@ -49,7 +50,7 @@ export const proveedoresService = {
       .select(SELECT_CON_CATEGORIAS)
       .order('created_at', { ascending: false });
 
-    if (error) throw new Error(`No se pudieron cargar los proveedores: ${error.message}`);
+    throwOnSupabaseError(error, 'No se pudieron cargar los proveedores');
     return (data as unknown as ProveedorRow[]).map(mapRow);
   },
 
@@ -63,7 +64,7 @@ export const proveedoresService = {
       p_categoria_ids: input.categoriaIds,
     });
 
-    if (error) throw new Error(`No se pudo crear el proveedor: ${error.message}`);
+    throwOnSupabaseError(error, 'No se pudo crear el proveedor');
     return obtenerPorId(supabase, id as string);
   },
 
@@ -78,7 +79,7 @@ export const proveedoresService = {
       p_categoria_ids: input.categoriaIds,
     });
 
-    if (error) throw new Error(`No se pudo actualizar el proveedor: ${error.message}`);
+    throwOnSupabaseError(error, 'No se pudo actualizar el proveedor');
     return obtenerPorId(supabase, id);
   },
 
@@ -89,7 +90,7 @@ export const proveedoresService = {
       .delete({ count: 'exact' })
       .eq('id', id);
 
-    if (error) throw new Error(`No se pudo eliminar el proveedor: ${error.message}`);
+    throwOnSupabaseError(error, 'No se pudo eliminar el proveedor');
     if (count === 0) throw new Error('El proveedor ya no existe (probablemente ya fue eliminado por otra persona).');
   },
 };

@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { throwOnSupabaseError } from '@/lib/services/supabaseError';
 import type { Categoria } from '@/types/proveedor';
 
 export const categoriasService = {
@@ -6,7 +7,7 @@ export const categoriasService = {
     const supabase = createSupabaseServerClient();
     const { data, error } = await supabase.from('categorias').select('id, nombre').order('nombre');
 
-    if (error) throw new Error(`No se pudieron cargar las categorías: ${error.message}`);
+    throwOnSupabaseError(error, 'No se pudieron cargar las categorías');
     return data as Categoria[];
   },
 };
