@@ -28,6 +28,7 @@ type FormularioProductoProps = {
   proveedores: Proveedor[];
   categorias: Categoria[];
   producto?: Producto;
+  valoresIniciales?: Partial<ProductoFormInput>;
   trigger?: React.ReactNode;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -35,15 +36,28 @@ type FormularioProductoProps = {
 
 type ProductoFormInput = z.input<typeof productoSchema>;
 
-function buildDefaultValues(producto?: Producto): ProductoFormInput {
+function buildDefaultValues(producto?: Producto, valoresIniciales?: Partial<ProductoFormInput>): ProductoFormInput {
+  if (producto) {
+    return {
+      proveedorId: producto.proveedorId,
+      categoriaId: producto.categoriaId,
+      nombre: producto.nombre,
+      url: producto.url,
+      imagenUrl: producto.imagenUrl,
+      precioMenor: producto.precioMenor,
+      precioMayor: producto.precioMayor,
+    };
+  }
+
   return {
-    proveedorId: producto?.proveedorId ?? '',
-    categoriaId: producto?.categoriaId ?? null,
-    nombre: producto?.nombre ?? '',
-    url: producto?.url ?? '',
-    imagenUrl: producto?.imagenUrl ?? null,
-    precioMenor: producto?.precioMenor ?? null,
-    precioMayor: producto?.precioMayor ?? null,
+    proveedorId: '',
+    categoriaId: null,
+    nombre: '',
+    url: '',
+    imagenUrl: null,
+    precioMenor: null,
+    precioMayor: null,
+    ...valoresIniciales,
   };
 }
 
@@ -51,6 +65,7 @@ export function FormularioProducto({
   proveedores,
   categorias,
   producto,
+  valoresIniciales,
   trigger,
   open: openProp,
   onOpenChange: onOpenChangeProp,
@@ -61,12 +76,12 @@ export function FormularioProducto({
 
   const form = useForm<ProductoFormInput, unknown, ProductoFormValues>({
     resolver: zodResolver(productoSchema),
-    defaultValues: buildDefaultValues(producto),
+    defaultValues: buildDefaultValues(producto, valoresIniciales),
   });
 
   useEffect(() => {
     if (open) {
-      form.reset(buildDefaultValues(producto));
+      form.reset(buildDefaultValues(producto, valoresIniciales));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
