@@ -192,7 +192,7 @@ describe('proveedoresService', () => {
 
   describe('eliminar', () => {
     it('elimina el proveedor por id', async () => {
-      const from = vi.fn().mockReturnValue(createQueryMock({ data: null, error: null }));
+      const from = vi.fn().mockReturnValue(createQueryMock({ data: null, error: null, count: 1 }));
       mockedCreateClient.mockReturnValue({ from });
 
       await proveedoresService.eliminar('p1');
@@ -201,11 +201,22 @@ describe('proveedoresService', () => {
     });
 
     it('lanza un error legible si Supabase falla', async () => {
-      const from = vi.fn().mockReturnValue(createQueryMock({ data: null, error: { message: 'fk violation' } }));
+      const from = vi.fn().mockReturnValue(
+        createQueryMock({ data: null, error: { message: 'fk violation' }, count: null })
+      );
       mockedCreateClient.mockReturnValue({ from });
 
       await expect(proveedoresService.eliminar('p1')).rejects.toThrow(
         'No se pudo eliminar el proveedor: fk violation'
+      );
+    });
+
+    it('lanza un error legible si el proveedor ya no existe', async () => {
+      const from = vi.fn().mockReturnValue(createQueryMock({ data: null, error: null, count: 0 }));
+      mockedCreateClient.mockReturnValue({ from });
+
+      await expect(proveedoresService.eliminar('p1')).rejects.toThrow(
+        'El proveedor ya no existe (probablemente ya fue eliminado por otra persona).'
       );
     });
   });

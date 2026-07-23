@@ -1,6 +1,6 @@
 import { vi } from 'vitest';
 
-type QueryResult = { data: unknown; error: unknown };
+type QueryResult = { data: unknown; error: unknown; count?: number | null };
 
 export function createQueryMock(result: QueryResult) {
   const chainMethods = ['select', 'insert', 'update', 'delete', 'eq', 'order'];

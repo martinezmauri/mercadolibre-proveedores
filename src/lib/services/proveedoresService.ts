@@ -84,7 +84,12 @@ export const proveedoresService = {
 
   async eliminar(id: string): Promise<void> {
     const supabase = createSupabaseServerClient();
-    const { error } = await supabase.from('proveedores').delete().eq('id', id);
+    const { error, count } = await supabase
+      .from('proveedores')
+      .delete({ count: 'exact' })
+      .eq('id', id);
+
     if (error) throw new Error(`No se pudo eliminar el proveedor: ${error.message}`);
+    if (count === 0) throw new Error('El proveedor ya no existe (probablemente ya fue eliminado por otra persona).');
   },
 };
