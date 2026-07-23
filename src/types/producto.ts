@@ -19,3 +19,9 @@ export type ProductoInput = {
   precioMenor: number | null;
   precioMayor: number | null;
 };
+
+export type DatosExtraidosProducto = {
+  nombre: string | null;
+  precioMayor: number | null;
+  categoriaId: string | null;
+};
