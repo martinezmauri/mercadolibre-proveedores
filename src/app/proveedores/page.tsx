@@ -11,9 +11,9 @@ export default async function ProveedoresPage() {
   ]);
 
   return (
-    <main className="mx-auto max-w-5xl space-y-6 p-6">
+    <main className="space-y-6 p-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Proveedores</h1>
+        <h1 className="text-4xl font-semibold">Proveedores</h1>
         <FormularioProveedor categorias={categorias} trigger={<Button>Nuevo proveedor</Button>} />
       </div>
       <TablaProveedores proveedores={proveedores} categorias={categorias} />
