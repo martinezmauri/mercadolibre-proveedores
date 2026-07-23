@@ -1,11 +1,10 @@
 'use client';
 
 import type { ColumnDef } from '@tanstack/react-table';
-import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { FormularioProveedor } from '@/components/proveedores/formulario-proveedor';
-import { eliminarProveedorAction } from '@/app/proveedores/actions';
+import { BotonEliminarProveedor } from '@/components/proveedores/boton-eliminar-proveedor';
 import type { Categoria, Proveedor } from '@/types/proveedor';
 
 export function crearColumnas(categorias: Categoria[]): ColumnDef<Proveedor>[] {
@@ -63,20 +62,7 @@ export function crearColumnas(categorias: Categoria[]): ColumnDef<Proveedor>[] {
               </Button>
             }
           />
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={async () => {
-              const result = await eliminarProveedorAction(row.original.id);
-              if (!result.success) {
-                toast.error(result.error);
-                return;
-              }
-              toast.success('Proveedor eliminado');
-            }}
-          >
-            Eliminar
-          </Button>
+          <BotonEliminarProveedor proveedorId={row.original.id} proveedorNombre={row.original.nombre} />
         </div>
       ),
     },
