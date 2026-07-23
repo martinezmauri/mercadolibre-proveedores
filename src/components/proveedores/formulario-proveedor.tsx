@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -24,7 +24,9 @@ import type { Categoria, Proveedor } from '@/types/proveedor';
 type FormularioProveedorProps = {
   categorias: Categoria[];
   proveedor?: Proveedor;
-  trigger: React.ReactNode;
+  trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 };
 
 type ProveedorFormInput = z.input<typeof proveedorSchema>;
@@ -39,20 +41,28 @@ function buildDefaultValues(proveedor?: Proveedor): ProveedorFormInput {
   };
 }
 
-export function FormularioProveedor({ categorias, proveedor, trigger }: FormularioProveedorProps) {
-  const [open, setOpen] = useState(false);
+export function FormularioProveedor({
+  categorias,
+  proveedor,
+  trigger,
+  open: openProp,
+  onOpenChange: onOpenChangeProp,
+}: FormularioProveedorProps) {
+  const [openState, setOpenState] = useState(false);
+  const open = openProp ?? openState;
+  const setOpen = onOpenChangeProp ?? setOpenState;
 
   const form = useForm<ProveedorFormInput, unknown, ProveedorFormValues>({
     resolver: zodResolver(proveedorSchema),
     defaultValues: buildDefaultValues(proveedor),
   });
 
-  function handleOpenChange(nextOpen: boolean) {
-    if (nextOpen) {
+  useEffect(() => {
+    if (open) {
       form.reset(buildDefaultValues(proveedor));
     }
-    setOpen(nextOpen);
-  }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   async function onSubmit(values: ProveedorFormValues) {
     const result = proveedor
@@ -68,8 +78,8 @@ export function FormularioProveedor({ categorias, proveedor, trigger }: Formular
   }
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+    <Dialog open={open} onOpenChange={setOpen}>
+      {trigger ? <DialogTrigger asChild>{trigger}</DialogTrigger> : null}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{proveedor ? 'Editar proveedor' : 'Nuevo proveedor'}</DialogTitle>

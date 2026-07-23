@@ -9,21 +9,20 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { FormularioProveedor } from '@/components/proveedores/formulario-proveedor';
-import type { Categoria, Proveedor } from '@/types/proveedor';
+import type { Proveedor } from '@/types/proveedor';
 
 type DetalleProveedorDialogProps = {
   proveedor: Proveedor | null;
-  categorias: Categoria[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onEditar: (proveedor: Proveedor) => void;
 };
 
 export function DetalleProveedorDialog({
   proveedor,
-  categorias,
   open,
   onOpenChange,
+  onEditar,
 }: DetalleProveedorDialogProps) {
   if (!proveedor) return null;
 
@@ -63,13 +62,7 @@ export function DetalleProveedorDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cerrar
           </Button>
-          <FormularioProveedor
-            categorias={categorias}
-            proveedor={proveedor}
-            trigger={
-              <Button onClick={() => onOpenChange(false)}>Editar</Button>
-            }
-          />
+          <Button onClick={() => onEditar(proveedor)}>Editar</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

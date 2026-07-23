@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { DataTable } from '@/components/ui/data-table';
 import { crearColumnas } from '@/components/proveedores/columnas-proveedores';
 import { DetalleProveedorDialog } from '@/components/proveedores/detalle-proveedor-dialog';
+import { FormularioProveedor } from '@/components/proveedores/formulario-proveedor';
 import type { Categoria, Proveedor } from '@/types/proveedor';
 
 type TablaProveedoresProps = {
@@ -14,6 +15,7 @@ type TablaProveedoresProps = {
 export function TablaProveedores({ proveedores, categorias }: TablaProveedoresProps) {
   const columns = useMemo(() => crearColumnas(categorias), [categorias]);
   const [proveedorSeleccionado, setProveedorSeleccionado] = useState<Proveedor | null>(null);
+  const [proveedorAEditar, setProveedorAEditar] = useState<Proveedor | null>(null);
 
   return (
     <>
@@ -25,10 +27,21 @@ export function TablaProveedores({ proveedores, categorias }: TablaProveedoresPr
       />
       <DetalleProveedorDialog
         proveedor={proveedorSeleccionado}
-        categorias={categorias}
         open={proveedorSeleccionado !== null}
         onOpenChange={(open) => {
           if (!open) setProveedorSeleccionado(null);
+        }}
+        onEditar={(proveedor) => {
+          setProveedorSeleccionado(null);
+          setProveedorAEditar(proveedor);
+        }}
+      />
+      <FormularioProveedor
+        categorias={categorias}
+        proveedor={proveedorAEditar ?? undefined}
+        open={proveedorAEditar !== null}
+        onOpenChange={(open) => {
+          if (!open) setProveedorAEditar(null);
         }}
       />
     </>
