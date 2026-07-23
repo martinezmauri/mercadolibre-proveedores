@@ -1,7 +1,6 @@
 'use client';
 
 import { useTransition } from 'react';
-import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -15,6 +14,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { eliminarProveedorAction } from '@/app/proveedores/actions';
+import { handleActionResult } from '@/lib/actionResult';
 
 type BotonEliminarProveedorProps = {
   proveedorId: string;
@@ -27,11 +27,7 @@ export function BotonEliminarProveedor({ proveedorId, proveedorNombre }: BotonEl
   function handleConfirm() {
     startTransition(async () => {
       const result = await eliminarProveedorAction(proveedorId);
-      if (!result.success) {
-        toast.error(result.error);
-        return;
-      }
-      toast.success('Proveedor eliminado');
+      handleActionResult(result, 'Proveedor eliminado');
     });
   }
 

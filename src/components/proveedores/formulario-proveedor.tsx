@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -19,6 +18,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { SelectorCategorias } from '@/components/proveedores/selector-categorias';
 import { proveedorSchema, type ProveedorFormValues } from '@/lib/validation/proveedorSchema';
 import { crearProveedorAction, actualizarProveedorAction } from '@/app/proveedores/actions';
+import { handleActionResult } from '@/lib/actionResult';
 import type { Categoria, Proveedor } from '@/types/proveedor';
 
 type FormularioProveedorProps = {
@@ -59,12 +59,10 @@ export function FormularioProveedor({ categorias, proveedor, trigger }: Formular
       ? await actualizarProveedorAction(proveedor.id, values)
       : await crearProveedorAction(values);
 
-    if (!result.success) {
-      toast.error(result.error);
+    if (!handleActionResult(result, proveedor ? 'Proveedor actualizado' : 'Proveedor creado')) {
       return;
     }
 
-    toast.success(proveedor ? 'Proveedor actualizado' : 'Proveedor creado');
     setOpen(false);
     form.reset();
   }
