@@ -30,20 +30,6 @@ function mapRow(row: ProveedorRow): Proveedor {
   };
 }
 
-async function asignarCategorias(
-  supabase: SupabaseServerClient,
-  proveedorId: string,
-  categoriaIds: string[]
-): Promise<void> {
-  if (categoriaIds.length === 0) return;
-
-  const { error } = await supabase
-    .from('proveedor_categorias')
-    .insert(categoriaIds.map((categoriaId) => ({ proveedor_id: proveedorId, categoria_id: categoriaId })));
-
-  if (error) throw new Error(`No se pudieron asignar las categorías: ${error.message}`);
-}
-
 async function obtenerPorId(supabase: SupabaseServerClient, id: string): Promise<Proveedor> {
   const { data, error } = await supabase
     .from('proveedores')
@@ -69,48 +55,30 @@ export const proveedoresService = {
 
   async crear(input: ProveedorInput): Promise<Proveedor> {
     const supabase = createSupabaseServerClient();
-    const { data: inserted, error: insertError } = await supabase
-      .from('proveedores')
-      .insert({
-        nombre: input.nombre,
-        url: input.url,
-        compra_minima: input.compraMinima,
-        whatsapp: input.whatsapp,
-      })
-      .select('id')
-      .single();
+    const { data: id, error } = await supabase.rpc('crear_proveedor', {
+      p_nombre: input.nombre,
+      p_url: input.url,
+      p_compra_minima: input.compraMinima,
+      p_whatsapp: input.whatsapp,
+      p_categoria_ids: input.categoriaIds,
+    });
 
-    if (insertError) throw new Error(`No se pudo crear el proveedor: ${insertError.message}`);
-
-    await asignarCategorias(supabase, (inserted as { id: string }).id, input.categoriaIds);
-    return obtenerPorId(supabase, (inserted as { id: string }).id);
+    if (error) throw new Error(`No se pudo crear el proveedor: ${error.message}`);
+    return obtenerPorId(supabase, id as string);
   },
 
   async actualizar(id: string, input: ProveedorInput): Promise<Proveedor> {
     const supabase = createSupabaseServerClient();
-    const { error: updateError } = await supabase
-      .from('proveedores')
-      .update({
-        nombre: input.nombre,
-        url: input.url,
-        compra_minima: input.compraMinima,
-        whatsapp: input.whatsapp,
-      })
-      .eq('id', id);
+    const { error } = await supabase.rpc('actualizar_proveedor', {
+      p_id: id,
+      p_nombre: input.nombre,
+      p_url: input.url,
+      p_compra_minima: input.compraMinima,
+      p_whatsapp: input.whatsapp,
+      p_categoria_ids: input.categoriaIds,
+    });
 
-    if (updateError) throw new Error(`No se pudo actualizar el proveedor: ${updateError.message}`);
-
-    const { error: deleteError } = await supabase
-      .from('proveedor_categorias')
-      .delete()
-      .eq('proveedor_id', id);
-
-    if (deleteError) {
-      throw new Error(`No se pudieron eliminar las categorías anteriores: ${deleteError.message}`);
-    }
-
-    await asignarCategorias(supabase, id, input.categoriaIds);
-
+    if (error) throw new Error(`No se pudo actualizar el proveedor: ${error.message}`);
     return obtenerPorId(supabase, id);
   },
 

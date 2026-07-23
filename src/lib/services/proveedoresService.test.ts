@@ -68,9 +68,8 @@ describe('proveedoresService', () => {
   });
 
   describe('crear', () => {
-    it('inserta el proveedor, asigna categorías y devuelve el registro completo', async () => {
-      const insertResult = createQueryMock({ data: { id: 'p1' }, error: null });
-      const categoriasInsertResult = createQueryMock({ data: null, error: null });
+    it('llama a la RPC crear_proveedor con los parámetros correctos y devuelve el registro completo', async () => {
+      const rpc = vi.fn().mockResolvedValue({ data: 'p1', error: null });
       const finalRead = createQueryMock({
         data: {
           id: 'p1',
@@ -83,14 +82,9 @@ describe('proveedoresService', () => {
         },
         error: null,
       });
+      const from = vi.fn().mockReturnValue(finalRead);
 
-      const from = vi
-        .fn()
-        .mockReturnValueOnce(insertResult)
-        .mockReturnValueOnce(categoriasInsertResult)
-        .mockReturnValueOnce(finalRead);
-
-      mockedCreateClient.mockReturnValue({ from });
+      mockedCreateClient.mockReturnValue({ rpc, from });
 
       const result = await proveedoresService.crear({
         nombre: 'Mayorista Uno',
@@ -100,19 +94,43 @@ describe('proveedoresService', () => {
         categoriaIds: ['c1'],
       });
 
-      expect(from).toHaveBeenNthCalledWith(1, 'proveedores');
-      expect(from).toHaveBeenNthCalledWith(2, 'proveedor_categorias');
-      expect(from).toHaveBeenNthCalledWith(3, 'proveedores');
+      expect(rpc).toHaveBeenCalledTimes(1);
+      expect(rpc).toHaveBeenCalledWith('crear_proveedor', {
+        p_nombre: 'Mayorista Uno',
+        p_url: 'https://mayorista-uno.com',
+        p_compra_minima: 100,
+        p_whatsapp: '5491122334455',
+        p_categoria_ids: ['c1'],
+      });
+      expect(from).toHaveBeenCalledWith('proveedores');
       expect(result.id).toBe('p1');
       expect(result.categorias).toEqual([{ id: 'c1', nombre: 'hogar' }]);
+    });
+
+    it('lanza un error legible y no toca la tabla si la RPC falla (atomicidad: una sola llamada de red)', async () => {
+      const rpc = vi.fn().mockResolvedValue({ data: null, error: { message: 'fk violation' } });
+      const from = vi.fn();
+
+      mockedCreateClient.mockReturnValue({ rpc, from });
+
+      await expect(
+        proveedoresService.crear({
+          nombre: 'Mayorista Uno',
+          url: 'https://mayorista-uno.com',
+          compraMinima: 100,
+          whatsapp: '5491122334455',
+          categoriaIds: ['c1'],
+        })
+      ).rejects.toThrow('No se pudo crear el proveedor: fk violation');
+
+      expect(rpc).toHaveBeenCalledTimes(1);
+      expect(from).not.toHaveBeenCalled();
     });
   });
 
   describe('actualizar', () => {
-    it('actualiza los datos y reemplaza las categorías asignadas', async () => {
-      const updateResult = createQueryMock({ data: null, error: null });
-      const deleteCategoriasResult = createQueryMock({ data: null, error: null });
-      const insertCategoriasResult = createQueryMock({ data: null, error: null });
+    it('llama a la RPC actualizar_proveedor con los parámetros correctos y devuelve el registro completo', async () => {
+      const rpc = vi.fn().mockResolvedValue({ data: null, error: null });
       const finalRead = createQueryMock({
         data: {
           id: 'p1',
@@ -125,15 +143,9 @@ describe('proveedoresService', () => {
         },
         error: null,
       });
+      const from = vi.fn().mockReturnValue(finalRead);
 
-      const from = vi
-        .fn()
-        .mockReturnValueOnce(updateResult)
-        .mockReturnValueOnce(deleteCategoriasResult)
-        .mockReturnValueOnce(insertCategoriasResult)
-        .mockReturnValueOnce(finalRead);
-
-      mockedCreateClient.mockReturnValue({ from });
+      mockedCreateClient.mockReturnValue({ rpc, from });
 
       const result = await proveedoresService.actualizar('p1', {
         nombre: 'Mayorista Uno Actualizado',
@@ -143,17 +155,25 @@ describe('proveedoresService', () => {
         categoriaIds: ['c2'],
       });
 
+      expect(rpc).toHaveBeenCalledTimes(1);
+      expect(rpc).toHaveBeenCalledWith('actualizar_proveedor', {
+        p_id: 'p1',
+        p_nombre: 'Mayorista Uno Actualizado',
+        p_url: 'https://mayorista-uno.com',
+        p_compra_minima: 150,
+        p_whatsapp: '5491122334455',
+        p_categoria_ids: ['c2'],
+      });
+      expect(from).toHaveBeenCalledWith('proveedores');
       expect(result.nombre).toBe('Mayorista Uno Actualizado');
       expect(result.categorias).toEqual([{ id: 'c2', nombre: 'cocina' }]);
     });
 
-    it('lanza un error legible si falla la eliminación de categorías anteriores', async () => {
-      const updateResult = createQueryMock({ data: null, error: null });
-      const deleteCategoriasResult = createQueryMock({ data: null, error: { message: 'fk violation' } });
+    it('lanza un error legible y no toca la tabla si la RPC falla (atomicidad: una sola llamada de red)', async () => {
+      const rpc = vi.fn().mockResolvedValue({ data: null, error: { message: 'fk violation' } });
+      const from = vi.fn();
 
-      const from = vi.fn().mockReturnValueOnce(updateResult).mockReturnValueOnce(deleteCategoriasResult);
-
-      mockedCreateClient.mockReturnValue({ from });
+      mockedCreateClient.mockReturnValue({ rpc, from });
 
       await expect(
         proveedoresService.actualizar('p1', {
@@ -163,7 +183,10 @@ describe('proveedoresService', () => {
           whatsapp: '5491122334455',
           categoriaIds: ['c2'],
         })
-      ).rejects.toThrow('No se pudieron eliminar las categorías anteriores: fk violation');
+      ).rejects.toThrow('No se pudo actualizar el proveedor: fk violation');
+
+      expect(rpc).toHaveBeenCalledTimes(1);
+      expect(from).not.toHaveBeenCalled();
     });
   });
 
