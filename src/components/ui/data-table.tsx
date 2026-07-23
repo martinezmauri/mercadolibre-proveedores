@@ -19,12 +19,14 @@ type DataTableProps<TData extends { id: string }, TValue> = {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   emptyMessage?: string;
+  onRowClick?: (row: TData) => void;
 };
 
 export function DataTable<TData extends { id: string }, TValue>({
   columns,
   data,
   emptyMessage = 'Sin resultados',
+  onRowClick,
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
@@ -52,7 +54,11 @@ export function DataTable<TData extends { id: string }, TValue>({
         <TableBody>
           {table.getRowModel().rows.length ? (
             table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id}>
+              <TableRow
+                key={row.id}
+                onClick={onRowClick ? () => onRowClick(row.original) : undefined}
+                className={onRowClick ? 'cursor-pointer' : undefined}
+              >
                 {row.getVisibleCells().map((cell) => (
                   <TableCell key={cell.id}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}

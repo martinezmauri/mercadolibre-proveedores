@@ -52,7 +52,7 @@ export function crearColumnas(categorias: Categoria[]): ColumnDef<Proveedor>[] {
       id: 'acciones',
       header: '',
       cell: ({ row }) => (
-        <div className="flex gap-2">
+        <div className="flex gap-2" onClick={(event) => event.stopPropagation()}>
           <FormularioProveedor
             categorias={categorias}
             proveedor={row.original}
