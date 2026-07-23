@@ -18,7 +18,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { SelectorCategorias } from '@/components/proveedores/selector-categorias';
 import { proveedorSchema, type ProveedorFormValues } from '@/lib/validation/proveedorSchema';
 import { crearProveedorAction, actualizarProveedorAction } from '@/app/proveedores/actions';
-import { handleActionResult } from '@/lib/actionResult';
+import { handleActionResult } from '@/lib/handleActionResult';
 import type { Categoria, Proveedor } from '@/types/proveedor';
 
 type FormularioProveedorProps = {

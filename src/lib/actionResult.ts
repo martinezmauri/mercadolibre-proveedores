@@ -1,11 +1,13 @@
-import { toast } from 'sonner';
-import type { ActionResult } from '@/app/proveedores/actions';
+import { z } from 'zod';
 
-export function handleActionResult(result: ActionResult, successMessage: string): boolean {
-  if (!result.success) {
-    toast.error(result.error);
-    return false;
+export type ActionResult = { success: true } | { success: false; error: string };
+
+export function toActionResult(error: unknown): ActionResult {
+  if (error instanceof z.ZodError) {
+    return { success: false, error: error.issues[0]?.message ?? 'Datos inválidos' };
   }
-  toast.success(successMessage);
-  return true;
+  if (error instanceof Error) {
+    return { success: false, error: error.message };
+  }
+  return { success: false, error: 'Ocurrió un error inesperado' };
 }

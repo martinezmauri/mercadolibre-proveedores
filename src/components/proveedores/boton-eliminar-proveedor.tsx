@@ -14,7 +14,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { eliminarProveedorAction } from '@/app/proveedores/actions';
-import { handleActionResult } from '@/lib/actionResult';
+import { handleActionResult } from '@/lib/handleActionResult';
 
 type BotonEliminarProveedorProps = {
   proveedorId: string;
