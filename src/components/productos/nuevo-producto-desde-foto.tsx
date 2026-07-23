@@ -18,7 +18,7 @@ export function NuevoProductoDesdeFoto({ proveedores, categorias }: NuevoProduct
   const [datosDesdeFoto, setDatosDesdeFoto] = useState<DatosFoto | null>(null);
 
   const valoresIniciales = datosDesdeFoto
-    ? { ...datosDesdeFoto, nombre: datosDesdeFoto.nombre ?? undefined }
+    ? { ...datosDesdeFoto, nombre: datosDesdeFoto.nombre ?? '' }
     : undefined;
 
   return (
