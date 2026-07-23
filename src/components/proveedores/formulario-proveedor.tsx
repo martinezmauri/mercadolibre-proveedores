@@ -29,19 +29,30 @@ type FormularioProveedorProps = {
 
 type ProveedorFormInput = z.input<typeof proveedorSchema>;
 
+function buildDefaultValues(proveedor?: Proveedor): ProveedorFormInput {
+  return {
+    nombre: proveedor?.nombre ?? '',
+    url: proveedor?.url ?? '',
+    compraMinima: proveedor?.compraMinima ?? null,
+    whatsapp: proveedor?.whatsapp ?? '',
+    categoriaIds: proveedor?.categorias.map((c) => c.id) ?? [],
+  };
+}
+
 export function FormularioProveedor({ categorias, proveedor, trigger }: FormularioProveedorProps) {
   const [open, setOpen] = useState(false);
 
   const form = useForm<ProveedorFormInput, unknown, ProveedorFormValues>({
     resolver: zodResolver(proveedorSchema),
-    defaultValues: {
-      nombre: proveedor?.nombre ?? '',
-      url: proveedor?.url ?? '',
-      compraMinima: proveedor?.compraMinima ?? null,
-      whatsapp: proveedor?.whatsapp ?? '',
-      categoriaIds: proveedor?.categorias.map((c) => c.id) ?? [],
-    },
+    defaultValues: buildDefaultValues(proveedor),
   });
+
+  function handleOpenChange(nextOpen: boolean) {
+    if (nextOpen) {
+      form.reset(buildDefaultValues(proveedor));
+    }
+    setOpen(nextOpen);
+  }
 
   async function onSubmit(values: ProveedorFormValues) {
     try {
@@ -60,7 +71,7 @@ export function FormularioProveedor({ categorias, proveedor, trigger }: Formular
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent>
         <DialogHeader>

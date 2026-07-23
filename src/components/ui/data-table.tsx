@@ -15,13 +15,13 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-type DataTableProps<TData, TValue> = {
+type DataTableProps<TData extends { id: string }, TValue> = {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   emptyMessage?: string;
 };
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData extends { id: string }, TValue>({
   columns,
   data,
   emptyMessage = 'Sin resultados',
@@ -30,6 +30,7 @@ export function DataTable<TData, TValue>({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    getRowId: (row) => row.id,
   });
 
   return (
