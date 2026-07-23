@@ -67,8 +67,12 @@ export function crearColumnas(categorias: Categoria[]): ColumnDef<Proveedor>[] {
             variant="destructive"
             size="sm"
             onClick={async () => {
-              await eliminarProveedorAction(row.original.id);
-              toast.success('Proveedor eliminado');
+              try {
+                await eliminarProveedorAction(row.original.id);
+                toast.success('Proveedor eliminado');
+              } catch (error) {
+                toast.error(error instanceof Error ? error.message : 'Ocurrió un error');
+              }
             }}
           >
             Eliminar
