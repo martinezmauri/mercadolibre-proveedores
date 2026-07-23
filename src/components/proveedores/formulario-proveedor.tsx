@@ -55,19 +55,18 @@ export function FormularioProveedor({ categorias, proveedor, trigger }: Formular
   }
 
   async function onSubmit(values: ProveedorFormValues) {
-    try {
-      if (proveedor) {
-        await actualizarProveedorAction(proveedor.id, values);
-        toast.success('Proveedor actualizado');
-      } else {
-        await crearProveedorAction(values);
-        toast.success('Proveedor creado');
-      }
-      setOpen(false);
-      form.reset();
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Ocurrió un error');
+    const result = proveedor
+      ? await actualizarProveedorAction(proveedor.id, values)
+      : await crearProveedorAction(values);
+
+    if (!result.success) {
+      toast.error(result.error);
+      return;
     }
+
+    toast.success(proveedor ? 'Proveedor actualizado' : 'Proveedor creado');
+    setOpen(false);
+    form.reset();
   }
 
   return (
