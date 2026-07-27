@@ -19,12 +19,20 @@ type FiltrosGastosProps = {
 };
 
 function aFechaISO(date: Date): string {
-  return date.toISOString().slice(0, 10);
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+function deFechaISO(fechaISO: string): Date {
+  const [year, month, day] = fechaISO.split('-').map(Number);
+  return new Date(year, month - 1, day);
 }
 
 export function FiltrosGastos({ personas, categorias, filtros, onFiltrosChange }: FiltrosGastosProps) {
   const rango: DateRange | undefined = filtros.desde
-    ? { from: new Date(filtros.desde), to: filtros.hasta ? new Date(filtros.hasta) : undefined }
+    ? { from: deFechaISO(filtros.desde), to: filtros.hasta ? deFechaISO(filtros.hasta) : undefined }
     : undefined;
 
   function handleRangoChange(nuevoRango: DateRange | undefined) {
