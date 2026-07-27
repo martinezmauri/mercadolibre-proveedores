@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import { Inter, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/sonner";
-import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/app-sidebar";
+import { AppHeader } from "@/components/layout/app-header";
 import "./globals.css";
 
 const inter = Inter({
@@ -38,9 +39,7 @@ export default function RootLayout({
           <SidebarProvider>
             <AppSidebar />
             <SidebarInset>
-              <div className="p-2">
-                <SidebarTrigger />
-              </div>
+              <AppHeader />
               {children}
             </SidebarInset>
           </SidebarProvider>
