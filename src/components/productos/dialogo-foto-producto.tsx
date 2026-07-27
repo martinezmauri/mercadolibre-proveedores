@@ -11,7 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
+import { SelectorFotoProducto } from '@/components/productos/selector-foto-producto';
 import { analizarFotoProductoAction } from '@/app/productos/actions';
 import type { DatosExtraidosProducto } from '@/types/producto';
 
@@ -60,13 +60,7 @@ export function DialogoFotoProducto({ trigger, onDatosExtraidos }: DialogoFotoPr
         <DialogHeader>
           <DialogTitle>Nuevo producto desde foto</DialogTitle>
         </DialogHeader>
-        <Input
-          type="file"
-          accept="image/*"
-          capture="environment"
-          disabled={isPending}
-          onChange={(e) => setArchivo(e.target.files?.[0] ?? null)}
-        />
+        <SelectorFotoProducto archivo={archivo} onArchivoChange={setArchivo} disabled={isPending} />
         <DialogFooter>
           <Button type="button" onClick={analizar} disabled={isPending || !archivo}>
             {isPending ? 'Analizando...' : 'Analizar'}
