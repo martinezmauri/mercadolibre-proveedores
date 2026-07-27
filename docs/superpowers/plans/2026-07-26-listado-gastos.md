@@ -1122,6 +1122,8 @@ git commit -m "chore: add shadcn calendar and popover components"
 
 No automated tests for this task — matches the agreed scope (UI components aren't unit-tested in this project). Verify manually via `npm run build` (type-checks JSX/props) after each file.
 
+Note on the `monto` field below: `gastoSchema.monto` is `z.coerce.number().positive(...)`, and Zod 4's `z.coerce.number()` has input type `unknown` — binding `field.value` (typed `unknown`) straight onto `<Input>`'s `value` prop via a bare `{...field}` spread is a real `tsc` error, not just a style nit. The code below already includes the fix: the same `typeof field.value === 'number' || typeof field.value === 'string' ? field.value : ''` narrowing that `formulario-producto.tsx` uses for its own `z.coerce.number()` fields (`precioMenor`/`precioMayor`).
+
 - [ ] **Step 1: Write `src/components/gastos/formulario-gasto.tsx`**
 
 ```tsx
@@ -1295,7 +1297,13 @@ export function FormularioGasto({
                 <FormItem>
                   <FormLabel>Monto (ARS)</FormLabel>
                   <FormControl>
-                    <Input type="number" step="0.01" {...field} onChange={(e) => field.onChange(e.target.value)} />
+                    <Input
+                      type="number"
+                      step="0.01"
+                      {...field}
+                      value={typeof field.value === 'number' || typeof field.value === 'string' ? field.value : ''}
+                      onChange={(e) => field.onChange(e.target.value)}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
