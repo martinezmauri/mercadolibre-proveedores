@@ -24,6 +24,7 @@ export function TablaProveedores({ proveedores, categorias }: TablaProveedoresPr
         data={proveedores}
         emptyMessage="No hay proveedores cargados"
         onRowClick={setProveedorSeleccionado}
+        className="rounded-lg border bg-card"
       />
       <DetalleProveedorDialog
         proveedor={proveedorSeleccionado}

@@ -13,7 +13,12 @@ export default async function ProveedoresPage() {
   return (
     <main className="space-y-6 p-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-4xl font-semibold">Proveedores</h1>
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Proveedores</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Gestioná los proveedores mayoristas del catálogo.
+          </p>
+        </div>
         <FormularioProveedor categorias={categorias} trigger={<Button>Nuevo proveedor</Button>} />
       </div>
       <TablaProveedores proveedores={proveedores} categorias={categorias} />

@@ -26,6 +26,7 @@ export function TablaProductos({ productos, proveedores, categorias }: TablaProd
         data={productos}
         emptyMessage="No hay productos cargados"
         onRowClick={setProductoSeleccionado}
+        className="rounded-lg border bg-card"
       />
       <DetalleProductoDialog
         producto={productoSeleccionado}
