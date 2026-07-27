@@ -44,14 +44,14 @@ export function FiltrosGastos({ personas, categorias, filtros, onFiltrosChange }
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
       <Select
         value={filtros.personaId ?? TODAS_LAS_PERSONAS}
         onValueChange={(value) =>
           onFiltrosChange({ ...filtros, personaId: value === TODAS_LAS_PERSONAS ? null : value })
         }
       >
-        <SelectTrigger className="w-44">
+        <SelectTrigger className="w-full sm:w-44">
           <SelectValue placeholder="Quién gastó" />
         </SelectTrigger>
         <SelectContent>
@@ -70,7 +70,7 @@ export function FiltrosGastos({ personas, categorias, filtros, onFiltrosChange }
           onFiltrosChange({ ...filtros, categoriaId: value === TODAS_LAS_CATEGORIAS ? null : value })
         }
       >
-        <SelectTrigger className="w-48">
+        <SelectTrigger className="w-full sm:w-48">
           <SelectValue placeholder="Categoría" />
         </SelectTrigger>
         <SelectContent>
@@ -87,7 +87,7 @@ export function FiltrosGastos({ personas, categorias, filtros, onFiltrosChange }
         value={filtros.campoFecha}
         onValueChange={(value) => onFiltrosChange({ ...filtros, campoFecha: value as CampoFechaGasto })}
       >
-        <SelectTrigger className="w-48">
+        <SelectTrigger className="w-full sm:w-48">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -98,7 +98,7 @@ export function FiltrosGastos({ personas, categorias, filtros, onFiltrosChange }
 
       <Popover>
         <PopoverTrigger asChild>
-          <Button variant="outline" className="w-64 justify-start font-normal">
+          <Button variant="outline" className="w-full justify-start font-normal sm:w-64">
             <CalendarIcon className="mr-2 size-4" />
             {filtros.desde ? `${filtros.desde}${filtros.hasta ? ` – ${filtros.hasta}` : ''}` : 'Rango de fechas'}
           </Button>

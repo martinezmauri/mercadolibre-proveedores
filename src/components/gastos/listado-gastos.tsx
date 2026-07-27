@@ -26,9 +26,9 @@ export function ListadoGastos({ gastos, personas, categorias }: ListadoGastosPro
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <FiltrosGastos personas={personas} categorias={categorias} filtros={filtros} onFiltrosChange={setFiltros} />
-        <div className="ml-auto text-sm text-muted-foreground">
+        <div className="text-sm text-muted-foreground sm:ml-auto">
           <span className="mr-1.5 inline-block h-2 w-2 rounded-full bg-primary" />
           {gastosFiltrados.length} {gastosFiltrados.length === 1 ? 'gasto' : 'gastos'}
         </div>
