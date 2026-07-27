@@ -1072,10 +1072,12 @@ function mapRow(row: ProveedorRow): Proveedor {
 
 - [ ] **Step 4: Fix the other Task-5 fallout — `extraccionProductoService.test.ts`'s category mocks**
 
-Modify `src/lib/services/extraccionProductoService.test.ts` — add `color` to both entries in the `CATEGORIAS` array (this file calls `extraccionProductoService.extraerDatosProducto(..., categorias: Categoria[])`, so its mock categories must satisfy the now-stricter `Categoria` type):
+Modify `src/lib/services/extraccionProductoService.test.ts` — add `color` to both entries in the `CATEGORIAS` array, **with an explicit `Categoria[]` type annotation** (this file calls `extraccionProductoService.extraerDatosProducto(..., categorias: Categoria[])`, so its mock categories must satisfy the now-stricter `Categoria` type — and without the annotation, TypeScript widens each `color: 'blue'` literal to plain `string` for an unannotated array-of-object-literals, which then fails to satisfy `ColorToken`; this isn't hypothetical, it reproduces as a real compiler error):
 
 ```ts
-const CATEGORIAS = [
+import type { Categoria } from '@/types/proveedor';
+
+const CATEGORIAS: Categoria[] = [
   { id: 'cat-1', nombre: 'Electrónica', color: 'blue' },
   { id: 'cat-2', nombre: 'Hogar', color: 'amber' },
 ];
