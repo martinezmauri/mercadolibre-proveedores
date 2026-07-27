@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DialogoFotoProducto } from '@/components/productos/dialogo-foto-producto';
 import { FormularioProducto } from '@/components/productos/formulario-producto';
@@ -24,7 +25,12 @@ export function NuevoProductoDesdeFoto({ proveedores, categorias }: NuevoProduct
   return (
     <>
       <DialogoFotoProducto
-        trigger={<Button variant="outline">Nuevo producto desde foto</Button>}
+        trigger={
+          <Button variant="outline" aria-label="Nuevo producto desde foto">
+            <Camera />
+            <span className="hidden sm:inline">Nuevo producto desde foto</span>
+          </Button>
+        }
         onDatosExtraidos={setDatosDesdeFoto}
       />
       <FormularioProducto
