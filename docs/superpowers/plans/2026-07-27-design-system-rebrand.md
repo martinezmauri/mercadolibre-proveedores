@@ -781,6 +781,7 @@ git commit -m "feat: add color to categorias and relocate ColorToken to badgeCol
 **Files:**
 - Modify: `src/lib/services/proveedoresService.ts`
 - Modify: `src/lib/services/proveedoresService.test.ts`
+- Modify: `src/lib/services/extraccionProductoService.test.ts`
 - Modify: `src/components/proveedores/columnas-proveedores.tsx`
 - Modify: `src/components/productos/columnas-productos.tsx`
 
@@ -788,6 +789,10 @@ git commit -m "feat: add color to categorias and relocate ColorToken to badgeCol
 - Consumes: `Categoria` with `color: ColorToken` (Task 5), `badgeColorClasses` from `@/lib/badgeColors` (Task 5).
 
 `proveedoresService` embeds each proveedor's categories via a join (`proveedor_categorias ( categorias ( ... ) )`) — that join's column list needs `color` added, or every `categoria.color` read by the UI would be `undefined` at runtime despite the type now claiming it's always present. `productosService`/`productos` pages already fetch the full `Categoria[]` list separately via `categoriasService.listar()` and look categories up by id — they automatically get `color` for free once Task 5 lands, no service change needed there.
+
+**Known fallout from Task 5 (confirmed via `tsc --noEmit` while implementing Task 5):** giving `Categoria` a required `color` field breaks type-checking in two places outside Task 5's file list, both fixed by this task:
+1. `proveedoresService.ts`'s `ProveedorRow` type declares its nested `categorias` shape inline as `{ id: string; nombre: string }` — missing `color`. Fixed below by reusing the real `Categoria` type instead of a hand-rolled duplicate.
+2. `extraccionProductoService.test.ts`'s `CATEGORIAS` mock array (passed to `extraccionProductoService.extraerDatosProducto(..., categorias: Categoria[])`) is missing `color` on both entries.
 
 - [ ] **Step 1: Update the failing test for `proveedoresService`**
 
@@ -1024,30 +1029,72 @@ describe('proveedoresService', () => {
 Run: `npm run test -- proveedoresService`
 Expected: FAIL on `expect(queryMock.select).toHaveBeenCalledWith(expect.stringContaining('color'))` — the current `SELECT_CON_CATEGORIAS` doesn't request `color`, so the mock's recorded call to `.select(...)` doesn't contain that string yet. This is the assertion that actually drives the implementation change below (the mock returns whatever `data` you configure regardless of the select string, so without this specific assertion the rest of the test would pass even with a stale select list — this line is what makes the test genuinely red before the fix).
 
-- [ ] **Step 3: Update the implementation**
+- [ ] **Step 3: Update the implementation — select `color` and reuse the `Categoria` type**
 
-Modify `src/lib/services/proveedoresService.ts` — change only the `SELECT_CON_CATEGORIAS` constant:
+Modify `src/lib/services/proveedoresService.ts` — two changes: the `SELECT_CON_CATEGORIAS` constant gains `color`, and `ProveedorRow`'s nested `categorias` shape stops being a hand-rolled `{ id: string; nombre: string }` (which is what's actually causing the `tsc` error — it doesn't structurally satisfy `Categoria` once `color` is required) and instead reuses the real `Categoria` type, since Supabase's embedded-resource shape here (`id`, `nombre`, `color`) already matches `Categoria` one-to-one with no snake_case renaming needed:
 
 ```ts
+import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { throwOnSupabaseError } from '@/lib/services/supabaseError';
+import type { Categoria, Proveedor, ProveedorInput } from '@/types/proveedor';
+
+type SupabaseServerClient = ReturnType<typeof createSupabaseServerClient>;
+
+type ProveedorRow = {
+  id: string;
+  nombre: string;
+  url: string;
+  compra_minima: number | null;
+  whatsapp: string | null;
+  created_at: string;
+  proveedor_categorias: { categorias: Categoria }[];
+};
+
 const SELECT_CON_CATEGORIAS = `
   id, nombre, url, compra_minima, whatsapp, created_at,
   proveedor_categorias ( categorias ( id, nombre, color ) )
 `;
+
+function mapRow(row: ProveedorRow): Proveedor {
+  return {
+    id: row.id,
+    nombre: row.nombre,
+    url: row.url,
+    compraMinima: row.compra_minima,
+    whatsapp: row.whatsapp,
+    createdAt: row.created_at,
+    categorias: row.proveedor_categorias.map((pc) => pc.categorias),
+  };
+}
 ```
 
-Nothing else in the file changes — `mapRow`'s `categorias: row.proveedor_categorias.map((pc) => pc.categorias)` already passes each `categorias` object through as-is, so it now carries `color` automatically.
+(`obtenerPorId` and the exported `proveedoresService` object below this point are unchanged — only the import line, `ProveedorRow`, `SELECT_CON_CATEGORIAS`, and `mapRow` shown above are touched.)
 
-- [ ] **Step 4: Run the test and type-check**
+- [ ] **Step 4: Fix the other Task-5 fallout — `extraccionProductoService.test.ts`'s category mocks**
+
+Modify `src/lib/services/extraccionProductoService.test.ts` — add `color` to both entries in the `CATEGORIAS` array (this file calls `extraccionProductoService.extraerDatosProducto(..., categorias: Categoria[])`, so its mock categories must satisfy the now-stricter `Categoria` type):
+
+```ts
+const CATEGORIAS = [
+  { id: 'cat-1', nombre: 'Electrónica', color: 'blue' },
+  { id: 'cat-2', nombre: 'Hogar', color: 'amber' },
+];
+```
+
+(Matches Task 5's migration: `electrónica` → `blue`, `hogar` → `amber`. Nothing else in this test file changes — the three `it()` blocks and their assertions are untouched.)
+
+- [ ] **Step 5: Run the tests and type-check**
 
 ```bash
 cd "C:\Users\Mauri\OneDrive\Escritorio\MercadoLibre"
 npm run test -- proveedoresService
+npm run test -- extraccionProductoService
 npx tsc --noEmit
 ```
 
-Expected: all `proveedoresService` tests pass; `tsc` passes with no errors anywhere in the project (this is the point where every remaining `Categoria`-typed consumer must already compile — if `columnas-proveedores.tsx`/`columnas-productos.tsx` aren't updated yet, they still compile fine since `Badge`'s existing `variant="secondary"` usage doesn't read `.color` at all; the type addition is additive, not breaking).
+Expected: all `proveedoresService` tests pass; all `extraccionProductoService` tests pass; `tsc` passes with **zero errors project-wide** (this is the point where every remaining `Categoria`-typed consumer must compile clean — if `columnas-proveedores.tsx`/`columnas-productos.tsx` aren't updated yet, they still compile fine since `Badge`'s existing `variant="secondary"` usage doesn't read `.color` at all; the type addition is additive, not breaking, for those two files specifically).
 
-- [ ] **Step 5: Colorize the badges in `columnas-proveedores.tsx`**
+- [ ] **Step 6: Colorize the badges in `columnas-proveedores.tsx`**
 
 Modify `src/components/proveedores/columnas-proveedores.tsx`:
 
@@ -1126,7 +1173,7 @@ export function crearColumnas(categorias: Categoria[]): ColumnDef<Proveedor>[] {
 }
 ```
 
-- [ ] **Step 6: Colorize the badge in `columnas-productos.tsx`**
+- [ ] **Step 7: Colorize the badge in `columnas-productos.tsx`**
 
 Modify `src/components/productos/columnas-productos.tsx`:
 
@@ -1199,12 +1246,12 @@ export function crearColumnas({ proveedores, categorias }: CrearColumnasParams):
 
 Note `categoriaPorId` changed from `Map<string, string>` (id → nombre) to `Map<string, Categoria>` (id → full object), since the cell now needs both `nombre` and `color`.
 
-- [ ] **Step 7: Type-check and commit**
+- [ ] **Step 8: Type-check and commit**
 
 ```bash
 cd "C:\Users\Mauri\OneDrive\Escritorio\MercadoLibre"
 npx tsc --noEmit
-git add src/lib/services/proveedoresService.ts src/lib/services/proveedoresService.test.ts src/components/proveedores/columnas-proveedores.tsx src/components/productos/columnas-productos.tsx
+git add src/lib/services/proveedoresService.ts src/lib/services/proveedoresService.test.ts src/lib/services/extraccionProductoService.test.ts src/components/proveedores/columnas-proveedores.tsx src/components/productos/columnas-productos.tsx
 git commit -m "feat: colorize category badges in proveedores and productos"
 ```
 
