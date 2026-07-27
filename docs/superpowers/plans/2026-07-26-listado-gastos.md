@@ -1645,7 +1645,9 @@ export function TablaGastos({ gastos, personas, categorias }: TablaGastosProps) 
 
 - [ ] **Step 3: Write `src/components/gastos/filtros-gastos.tsx`**
 
-Uses the real `Calendar`/`Popover` API confirmed in Task 9 (`mode="range"`, `selected: DateRange`, `onSelect`, `numberOfMonths`). Dates are stored in `FiltrosGasto` as `YYYY-MM-DD` strings (`date.toISOString().slice(0, 10)`), which `filtrarGastos` (Task 7) already expects.
+Uses the real `Calendar`/`Popover` API confirmed in Task 9 (`mode="range"`, `selected: DateRange`, `onSelect`, `numberOfMonths`). Dates are stored in `FiltrosGasto` as `YYYY-MM-DD` strings, which `filtrarGastos` (Task 7) already expects.
+
+`aFechaISO`/`deFechaISO` deliberately avoid `Date.prototype.toISOString()` and the bare `new Date('YYYY-MM-DD')` constructor: react-day-picker's `onSelect` hands back `Date` objects at **local** midnight of the clicked day, but `new Date('YYYY-MM-DD')` parses as **UTC** midnight (ECMA-262 date-only rule) — round-tripping through either conversion shifts the calendar day by one for any timezone that crosses a day boundary in that direction. Confirmed empirically in this app's actual server timezone (`America/Buenos_Aires`, UTC-3): the naive `new Date(filtros.desde)` reverse-parse was already wrong *today*, not just for a hypothetical positive-offset user — `new Date('2026-07-26')` reads back as July 25 in local getters. Both helpers below work entirely in local date parts (`getFullYear`/`getMonth`/`getDate` and the 3-arg `new Date(y, m, d)` constructor) to sidestep the UTC boundary entirely, correct for any timezone.
 
 ```tsx
 'use client';
@@ -1669,12 +1671,20 @@ type FiltrosGastosProps = {
 };
 
 function aFechaISO(date: Date): string {
-  return date.toISOString().slice(0, 10);
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
+function deFechaISO(fechaISO: string): Date {
+  const [year, month, day] = fechaISO.split('-').map(Number);
+  return new Date(year, month - 1, day);
 }
 
 export function FiltrosGastos({ personas, categorias, filtros, onFiltrosChange }: FiltrosGastosProps) {
   const rango: DateRange | undefined = filtros.desde
-    ? { from: new Date(filtros.desde), to: filtros.hasta ? new Date(filtros.hasta) : undefined }
+    ? { from: deFechaISO(filtros.desde), to: filtros.hasta ? deFechaISO(filtros.hasta) : undefined }
     : undefined;
 
   function handleRangoChange(nuevoRango: DateRange | undefined) {
