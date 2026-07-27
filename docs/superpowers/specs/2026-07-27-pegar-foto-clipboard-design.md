@@ -16,8 +16,10 @@ El diálogo `DialogoFotoProducto` (`/productos`, botón "Nuevo producto desde fo
 ### 1. `src/lib/extraerImagenDeClipboard.ts` (nuevo — función pura)
 
 ```ts
-export function extraerImagenDeClipboard(items: DataTransferItemList): File | null
+export function extraerImagenDeClipboard(items: ArrayLike<{ kind: string; type: string; getAsFile: () => File | null }>): File | null
 ```
+
+(La implementación final usa `ArrayLike<...>` en vez de `DataTransferItemList` directamente — permite testear con objetos planos sin DOM real, sin perder compatibilidad: `DataTransferItemList` satisface esa forma estructuralmente.)
 
 Recorre los items del portapapeles y devuelve el primer `File` cuyo `type` empiece con `image/` (vía `item.getAsFile()`), o `null` si no hay ninguno. Sin dependencias de React ni del DOM más allá del tipo `DataTransferItemList` — testeable con objetos mock planos (`{ kind, type, getAsFile }`).
 
