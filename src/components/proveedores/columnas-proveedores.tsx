@@ -5,6 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { FormularioProveedor } from '@/components/proveedores/formulario-proveedor';
 import { BotonEliminarProveedor } from '@/components/proveedores/boton-eliminar-proveedor';
+import { badgeColorClasses } from '@/lib/badgeColors';
+import { cn } from '@/lib/utils';
 import type { Categoria, Proveedor } from '@/types/proveedor';
 
 export function crearColumnas(categorias: Categoria[]): ColumnDef<Proveedor>[] {
@@ -41,7 +43,7 @@ export function crearColumnas(categorias: Categoria[]): ColumnDef<Proveedor>[] {
       cell: ({ row }) => (
         <div className="flex flex-wrap gap-1">
           {row.original.categorias.map((categoria) => (
-            <Badge key={categoria.id} variant="secondary">
+            <Badge key={categoria.id} variant="outline" className={cn(badgeColorClasses(categoria.color))}>
               {categoria.nombre}
             </Badge>
           ))}

@@ -1,6 +1,6 @@
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { throwOnSupabaseError } from '@/lib/services/supabaseError';
-import type { Proveedor, ProveedorInput } from '@/types/proveedor';
+import type { Categoria, Proveedor, ProveedorInput } from '@/types/proveedor';
 
 type SupabaseServerClient = ReturnType<typeof createSupabaseServerClient>;
 
@@ -11,12 +11,12 @@ type ProveedorRow = {
   compra_minima: number | null;
   whatsapp: string | null;
   created_at: string;
-  proveedor_categorias: { categorias: { id: string; nombre: string } }[];
+  proveedor_categorias: { categorias: Categoria }[];
 };
 
 const SELECT_CON_CATEGORIAS = `
   id, nombre, url, compra_minima, whatsapp, created_at,
-  proveedor_categorias ( categorias ( id, nombre ) )
+  proveedor_categorias ( categorias ( id, nombre, color ) )
 `;
 
 function mapRow(row: ProveedorRow): Proveedor {

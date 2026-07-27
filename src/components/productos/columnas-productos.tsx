@@ -5,6 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { FormularioProducto } from '@/components/productos/formulario-producto';
 import { BotonEliminarProducto } from '@/components/productos/boton-eliminar-producto';
+import { badgeColorClasses } from '@/lib/badgeColors';
+import { cn } from '@/lib/utils';
 import type { Categoria, Proveedor } from '@/types/proveedor';
 import type { Producto } from '@/types/producto';
 
@@ -15,7 +17,7 @@ type CrearColumnasParams = {
 
 export function crearColumnas({ proveedores, categorias }: CrearColumnasParams): ColumnDef<Producto>[] {
   const proveedorPorId = new Map(proveedores.map((p) => [p.id, p.nombre]));
-  const categoriaPorId = new Map(categorias.map((c) => [c.id, c.nombre]));
+  const categoriaPorId = new Map(categorias.map((c) => [c.id, c]));
 
   return [
     { accessorKey: 'nombre', header: 'Nombre' },
@@ -28,8 +30,13 @@ export function crearColumnas({ proveedores, categorias }: CrearColumnasParams):
       id: 'categoria',
       header: 'Categoría',
       cell: ({ row }) => {
-        const nombre = row.original.categoriaId ? categoriaPorId.get(row.original.categoriaId) : undefined;
-        return nombre ? <Badge variant="secondary">{nombre}</Badge> : null;
+        const categoria = row.original.categoriaId ? categoriaPorId.get(row.original.categoriaId) : undefined;
+        if (!categoria) return null;
+        return (
+          <Badge variant="outline" className={cn(badgeColorClasses(categoria.color))}>
+            {categoria.nombre}
+          </Badge>
+        );
       },
     },
     { accessorKey: 'precioMenor', header: 'Precio menor' },

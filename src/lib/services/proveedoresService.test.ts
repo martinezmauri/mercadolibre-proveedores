@@ -17,30 +17,30 @@ describe('proveedoresService', () => {
 
   describe('listar', () => {
     it('devuelve los proveedores con sus categorías aplanadas', async () => {
-      const from = vi.fn().mockReturnValue(
-        createQueryMock({
-          data: [
-            {
-              id: 'p1',
-              nombre: 'Mayorista Uno',
-              url: 'https://mayorista-uno.com',
-              compra_minima: 100,
-              whatsapp: '5491122334455',
-              created_at: '2026-07-22T00:00:00.000Z',
-              proveedor_categorias: [
-                { categorias: { id: 'c1', nombre: 'hogar' } },
-                { categorias: { id: 'c2', nombre: 'cocina' } },
-              ],
-            },
-          ],
-          error: null,
-        })
-      );
+      const queryMock = createQueryMock({
+        data: [
+          {
+            id: 'p1',
+            nombre: 'Mayorista Uno',
+            url: 'https://mayorista-uno.com',
+            compra_minima: 100,
+            whatsapp: '5491122334455',
+            created_at: '2026-07-22T00:00:00.000Z',
+            proveedor_categorias: [
+              { categorias: { id: 'c1', nombre: 'hogar', color: 'amber' } },
+              { categorias: { id: 'c2', nombre: 'cocina', color: 'orange' } },
+            ],
+          },
+        ],
+        error: null,
+      });
+      const from = vi.fn().mockReturnValue(queryMock);
       mockedCreateClient.mockReturnValue({ from });
 
       const result = await proveedoresService.listar();
 
       expect(from).toHaveBeenCalledWith('proveedores');
+      expect(queryMock.select).toHaveBeenCalledWith(expect.stringContaining('color'));
       expect(result).toEqual([
         {
           id: 'p1',
@@ -50,8 +50,8 @@ describe('proveedoresService', () => {
           whatsapp: '5491122334455',
           createdAt: '2026-07-22T00:00:00.000Z',
           categorias: [
-            { id: 'c1', nombre: 'hogar' },
-            { id: 'c2', nombre: 'cocina' },
+            { id: 'c1', nombre: 'hogar', color: 'amber' },
+            { id: 'c2', nombre: 'cocina', color: 'orange' },
           ],
         },
       ]);
@@ -78,7 +78,7 @@ describe('proveedoresService', () => {
           compra_minima: 100,
           whatsapp: '5491122334455',
           created_at: '2026-07-22T00:00:00.000Z',
-          proveedor_categorias: [{ categorias: { id: 'c1', nombre: 'hogar' } }],
+          proveedor_categorias: [{ categorias: { id: 'c1', nombre: 'hogar', color: 'amber' } }],
         },
         error: null,
       });
@@ -104,7 +104,7 @@ describe('proveedoresService', () => {
       });
       expect(from).toHaveBeenCalledWith('proveedores');
       expect(result.id).toBe('p1');
-      expect(result.categorias).toEqual([{ id: 'c1', nombre: 'hogar' }]);
+      expect(result.categorias).toEqual([{ id: 'c1', nombre: 'hogar', color: 'amber' }]);
     });
 
     it('lanza un error legible y no toca la tabla si la RPC falla (atomicidad: una sola llamada de red)', async () => {
@@ -139,7 +139,7 @@ describe('proveedoresService', () => {
           compra_minima: 150,
           whatsapp: '5491122334455',
           created_at: '2026-07-22T00:00:00.000Z',
-          proveedor_categorias: [{ categorias: { id: 'c2', nombre: 'cocina' } }],
+          proveedor_categorias: [{ categorias: { id: 'c2', nombre: 'cocina', color: 'orange' } }],
         },
         error: null,
       });
@@ -166,7 +166,7 @@ describe('proveedoresService', () => {
       });
       expect(from).toHaveBeenCalledWith('proveedores');
       expect(result.nombre).toBe('Mayorista Uno Actualizado');
-      expect(result.categorias).toEqual([{ id: 'c2', nombre: 'cocina' }]);
+      expect(result.categorias).toEqual([{ id: 'c2', nombre: 'cocina', color: 'orange' }]);
     });
 
     it('lanza un error legible y no toca la tabla si la RPC falla (atomicidad: una sola llamada de red)', async () => {

@@ -13,10 +13,11 @@ vi.mock('@anthropic-ai/sdk/helpers/zod', () => ({
 }));
 
 import { extraccionProductoService } from './extraccionProductoService';
+import type { Categoria } from '@/types/proveedor';
 
-const CATEGORIAS = [
-  { id: 'cat-1', nombre: 'Electrónica' },
-  { id: 'cat-2', nombre: 'Hogar' },
+const CATEGORIAS: Categoria[] = [
+  { id: 'cat-1', nombre: 'Electrónica', color: 'blue' },
+  { id: 'cat-2', nombre: 'Hogar', color: 'amber' },
 ];
 
 describe('extraccionProductoService', () => {
