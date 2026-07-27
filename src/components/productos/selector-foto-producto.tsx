@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type ClipboardEvent } from 'react';
+import { useEffect, useRef, type ClipboardEvent } from 'react';
 import { ClipboardPaste, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,16 +14,13 @@ type SelectorFotoProductoProps = {
 };
 
 export function SelectorFotoProducto({ archivo, onArchivoChange, disabled }: SelectorFotoProductoProps) {
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
-    if (!archivo) {
-      setPreviewUrl(null);
-      return;
-    }
+    if (!archivo || !imgRef.current) return;
 
     const url = URL.createObjectURL(archivo);
-    setPreviewUrl(url);
+    imgRef.current.src = url;
 
     return () => URL.revokeObjectURL(url);
   }, [archivo]);
@@ -34,13 +31,13 @@ export function SelectorFotoProducto({ archivo, onArchivoChange, disabled }: Sel
     if (imagen) onArchivoChange(imagen);
   }
 
-  if (archivo && previewUrl) {
+  if (archivo) {
     return (
       <div className="space-y-2">
         {/* Preview de un archivo local (blob: URL) — next/image no aporta nada acá. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src={previewUrl}
+          ref={imgRef}
           alt="Preview de la foto del producto"
           className="max-h-48 w-full rounded-md border object-contain"
         />
