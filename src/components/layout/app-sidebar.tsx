@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Package, Truck } from 'lucide-react';
+import { Home, Package, Truck, Wallet } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
@@ -18,6 +18,7 @@ const NAV_ITEMS = [
   { href: '/', label: 'Inicio', icon: Home },
   { href: '/proveedores', label: 'Proveedores', icon: Truck },
   { href: '/productos', label: 'Productos', icon: Package },
+  { href: '/gastos', label: 'Gastos', icon: Wallet },
 ];
 
 export function AppSidebar() {

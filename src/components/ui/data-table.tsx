@@ -14,12 +14,14 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { cn } from '@/lib/utils';
 
 type DataTableProps<TData extends { id: string }, TValue> = {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   emptyMessage?: string;
   onRowClick?: (row: TData) => void;
+  className?: string;
 };
 
 export function DataTable<TData extends { id: string }, TValue>({
@@ -27,6 +29,7 @@ export function DataTable<TData extends { id: string }, TValue>({
   data,
   emptyMessage = 'Sin resultados',
   onRowClick,
+  className,
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
@@ -36,7 +39,7 @@ export function DataTable<TData extends { id: string }, TValue>({
   });
 
   return (
-    <div className="rounded-md border">
+    <div className={cn('rounded-md border', className)}>
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
