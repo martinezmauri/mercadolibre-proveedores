@@ -22,7 +22,7 @@ export const extraccionProductoService = {
     mimeType: ImagenMimeType,
     categorias: Categoria[],
   ): Promise<DatosExtraidosProducto> {
-    const client = new Anthropic();
+    const client = new Anthropic({ apiKey: process.env.CLAUDE_API_KEY });
 
     const response = await client.messages.parse({
       model: 'claude-haiku-4-5',

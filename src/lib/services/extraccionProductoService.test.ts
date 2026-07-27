@@ -1,11 +1,15 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-const parseMock = vi.fn();
+const { parseMock, anthropicConstructorMock } = vi.hoisted(() => {
+  const parseMock = vi.fn();
+  const anthropicConstructorMock = vi.fn().mockImplementation(function () {
+    return { messages: { parse: parseMock } };
+  });
+  return { parseMock, anthropicConstructorMock };
+});
 
 vi.mock('@anthropic-ai/sdk', () => ({
-  default: vi.fn().mockImplementation(function () {
-    return { messages: { parse: parseMock } };
-  }),
+  default: anthropicConstructorMock,
 }));
 
 vi.mock('@anthropic-ai/sdk/helpers/zod', () => ({
@@ -23,9 +27,23 @@ const CATEGORIAS: Categoria[] = [
 describe('extraccionProductoService', () => {
   beforeEach(() => {
     parseMock.mockReset();
+    anthropicConstructorMock.mockClear();
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
   describe('extraerDatosProducto', () => {
+    it('crea el cliente de Anthropic con la API key de CLAUDE_API_KEY', async () => {
+      vi.stubEnv('CLAUDE_API_KEY', 'test-key-123');
+      parseMock.mockResolvedValue({ parsed_output: null });
+
+      await extraccionProductoService.extraerDatosProducto('base64==', 'image/jpeg', CATEGORIAS);
+
+      expect(anthropicConstructorMock).toHaveBeenCalledWith({ apiKey: 'test-key-123' });
+    });
+
     it('mapea la categoría devuelta (case-insensitive) a su ID real', async () => {
       parseMock.mockResolvedValue({
         parsed_output: { nombre: 'Auriculares Bluetooth', precio: 15000, categoria: 'electrónica' },
