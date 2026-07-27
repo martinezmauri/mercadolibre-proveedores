@@ -797,7 +797,7 @@ git commit -m "feat: add gastosService with persona/categoria/fecha filters"
 - Consumes: `FiltrosGasto`, `Gasto` from `@/types/gasto`.
 - Produces: `filtrarGastos(gastos: Gasto[], filtros: FiltrosGasto): Gasto[]` — consumed by Task 12's `listado-gastos.tsx`.
 
-This is the client-side filtering logic described in the spec. Date bounds use `Date` comparison (not string comparison) so a same-day timestamp is correctly included at the upper bound — e.g. `hasta: '2026-07-20'` must still include a gasto created at `2026-07-20T23:59:00Z`.
+This is the client-side filtering logic described in the spec. Date bounds use `Date` comparison (not string comparison) so a same-day timestamp is correctly included at the upper bound — e.g. `hasta: '2026-07-20'` must still include a gasto created at `2026-07-20T23:59:00Z`. Use `setUTCHours` (not `setHours`) when computing the end-of-day boundary: `new Date('2026-07-20')` parses as UTC midnight, and this app's server runs in `America/Buenos_Aires` (UTC-3) — `setHours` would mutate the *local* hour, silently shifting the boundary back by 3 hours and wrongly excluding same-day gastos timestamped late in the UTC day (verified during implementation: this is a real bug, not a hypothetical).
 
 - [ ] **Step 1: Write the failing test**
 
@@ -906,7 +906,7 @@ export function filtrarGastos(gastos: Gasto[], filtros: FiltrosGasto): Gasto[] {
 
     if (filtros.hasta) {
       const finDelDia = new Date(filtros.hasta);
-      finDelDia.setHours(23, 59, 59, 999);
+      finDelDia.setUTCHours(23, 59, 59, 999);
       if (valorFecha > finDelDia) return false;
     }
 
