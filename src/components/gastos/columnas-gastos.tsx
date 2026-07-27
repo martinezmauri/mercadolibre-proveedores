@@ -7,7 +7,8 @@ import { BotonEliminarGasto } from '@/components/gastos/boton-eliminar-gasto';
 import { FormularioGasto } from '@/components/gastos/formulario-gasto';
 import { badgeColorClasses } from '@/lib/badgeColors';
 import { cn } from '@/lib/utils';
-import type { CategoriaGasto, ColorToken, Gasto, Persona } from '@/types/gasto';
+import type { ColorToken } from '@/lib/badgeColors';
+import type { CategoriaGasto, Gasto, Persona } from '@/types/gasto';
 
 const COLOR_POR_PERSONA: Record<string, ColorToken> = {
   'Mauricio Martinez': 'indigo',

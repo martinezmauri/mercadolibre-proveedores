@@ -12,8 +12,8 @@ describe('categoriasService.listar', () => {
   it('devuelve las categorías ordenadas por nombre', async () => {
     const queryMock = createQueryMock({
       data: [
-        { id: '1', nombre: 'cocina' },
-        { id: '2', nombre: 'hogar' },
+        { id: '1', nombre: 'cocina', color: 'orange' },
+        { id: '2', nombre: 'hogar', color: 'amber' },
       ],
       error: null,
     });
@@ -23,11 +23,11 @@ describe('categoriasService.listar', () => {
     const result = await categoriasService.listar();
 
     expect(from).toHaveBeenCalledWith('categorias');
-    expect(queryMock.select).toHaveBeenCalledWith('id, nombre');
+    expect(queryMock.select).toHaveBeenCalledWith('id, nombre, color');
     expect(queryMock.order).toHaveBeenCalledWith('nombre');
     expect(result).toEqual([
-      { id: '1', nombre: 'cocina' },
-      { id: '2', nombre: 'hogar' },
+      { id: '1', nombre: 'cocina', color: 'orange' },
+      { id: '2', nombre: 'hogar', color: 'amber' },
     ]);
   });
 

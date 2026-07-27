@@ -1,6 +1,9 @@
+import type { ColorToken } from '@/lib/badgeColors';
+
 export type Categoria = {
   id: string;
   nombre: string;
+  color: ColorToken;
 };
 
 export type Proveedor = {

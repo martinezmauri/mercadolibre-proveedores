@@ -5,7 +5,7 @@ import type { Categoria } from '@/types/proveedor';
 export const categoriasService = {
   async listar(): Promise<Categoria[]> {
     const supabase = createSupabaseServerClient();
-    const { data, error } = await supabase.from('categorias').select('id, nombre').order('nombre');
+    const { data, error } = await supabase.from('categorias').select('id, nombre, color').order('nombre');
 
     throwOnSupabaseError(error, 'No se pudieron cargar las categorías');
     return data as Categoria[];

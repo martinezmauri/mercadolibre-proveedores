@@ -1,13 +1,4 @@
-export type ColorToken =
-  | 'blue'
-  | 'cyan'
-  | 'amber'
-  | 'violet'
-  | 'orange'
-  | 'emerald'
-  | 'slate'
-  | 'indigo'
-  | 'fuchsia';
+import type { ColorToken } from '@/lib/badgeColors';
 
 export type Persona = {
   id: string;

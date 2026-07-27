@@ -1,4 +1,13 @@
-import type { ColorToken } from '@/types/gasto';
+export type ColorToken =
+  | 'blue'
+  | 'cyan'
+  | 'amber'
+  | 'violet'
+  | 'orange'
+  | 'emerald'
+  | 'slate'
+  | 'indigo'
+  | 'fuchsia';
 
 const BADGE_COLOR_CLASSES: Record<ColorToken, string> = {
   blue: 'border-transparent bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300',
