@@ -87,6 +87,7 @@ export const proveedoresService = {
       .from('proveedores')
       .select(SELECT_CON_CATEGORIAS, { count: 'exact' })
       .order('created_at', { ascending: false })
+      .order('id', { ascending: false })
       .range(desde, hasta);
 
     if (busqueda) {

@@ -39,7 +39,7 @@ export default async function ProveedoresPage({ searchParams }: ProveedoresPageP
         </div>
         <FormularioProveedor categorias={categorias} trigger={<Button>Nuevo proveedor</Button>} />
       </div>
-      <FiltrosProveedores categorias={categorias} />
+      <FiltrosProveedores categorias={categorias} total={total} />
       <TablaProveedores proveedores={proveedores} categorias={categorias} />
       <PaginadorProveedores paginaActual={pagina} totalPaginas={totalPaginas} />
     </main>

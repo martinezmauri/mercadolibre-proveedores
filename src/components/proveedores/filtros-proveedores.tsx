@@ -11,15 +11,16 @@ const TODAS_LAS_CATEGORIAS = 'todas-las-categorias';
 
 type FiltrosProveedoresProps = {
   categorias: Categoria[];
+  total: number;
 };
 
-export function FiltrosProveedores({ categorias }: FiltrosProveedoresProps) {
+export function FiltrosProveedores({ categorias, total }: FiltrosProveedoresProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [busqueda, setBusqueda] = useState(searchParams.get('q') ?? '');
 
-  function actualizarParams(cambios: Record<string, string | null>) {
+  function actualizarParams(cambios: Record<string, string | null>, opciones?: { reemplazar?: boolean }) {
     const params = new URLSearchParams(searchParams.toString());
     for (const [clave, valor] of Object.entries(cambios)) {
       if (valor) {
@@ -29,13 +30,18 @@ export function FiltrosProveedores({ categorias }: FiltrosProveedoresProps) {
       }
     }
     params.delete('pagina');
-    router.push(`${pathname}?${params.toString()}`);
+    const destino = `${pathname}?${params.toString()}`;
+    if (opciones?.reemplazar) {
+      router.replace(destino);
+    } else {
+      router.push(destino);
+    }
   }
 
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (busqueda !== (searchParams.get('q') ?? '')) {
-        actualizarParams({ q: busqueda || null });
+        actualizarParams({ q: busqueda || null }, { reemplazar: true });
       }
     }, 400);
     return () => clearTimeout(timeout);
@@ -51,13 +57,14 @@ export function FiltrosProveedores({ categorias }: FiltrosProveedoresProps) {
           className="w-full pl-9 sm:w-64"
           value={busqueda}
           onChange={(e) => setBusqueda(e.target.value)}
+          aria-label="Buscar proveedor por nombre"
         />
       </div>
       <Select
         value={searchParams.get('categoria') ?? TODAS_LAS_CATEGORIAS}
         onValueChange={(value) => actualizarParams({ categoria: value === TODAS_LAS_CATEGORIAS ? null : value })}
       >
-        <SelectTrigger className="w-full sm:w-48">
+        <SelectTrigger className="w-full sm:w-48" aria-label="Filtrar por rubro">
           <SelectValue placeholder="Rubro" />
         </SelectTrigger>
         <SelectContent>
@@ -69,6 +76,10 @@ export function FiltrosProveedores({ categorias }: FiltrosProveedoresProps) {
           ))}
         </SelectContent>
       </Select>
+      <div className="text-sm text-muted-foreground sm:ml-auto">
+        <span className="mr-1.5 inline-block h-2 w-2 rounded-full bg-primary" />
+        {total} {total === 1 ? 'proveedor' : 'proveedores'}
+      </div>
     </div>
   );
 }
