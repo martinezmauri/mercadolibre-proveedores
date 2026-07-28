@@ -1,11 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useFieldArray, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Dialog,
   DialogContent,
@@ -15,11 +17,12 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SelectorCategorias } from '@/components/proveedores/selector-categorias';
 import { proveedorSchema, type ProveedorFormValues } from '@/lib/validation/proveedorSchema';
 import { crearProveedorAction, actualizarProveedorAction } from '@/app/proveedores/actions';
 import { handleActionResult } from '@/lib/handleActionResult';
-import type { Categoria, Proveedor } from '@/types/proveedor';
+import type { Categoria, Proveedor, TipoContacto } from '@/types/proveedor';
 
 type FormularioProveedorProps = {
   categorias: Categoria[];
@@ -31,13 +34,24 @@ type FormularioProveedorProps = {
 
 type ProveedorFormInput = z.input<typeof proveedorSchema>;
 
+const OPCIONES_TIPO_CONTACTO: { value: TipoContacto; label: string }[] = [
+  { value: 'telefono', label: 'Teléfono' },
+  { value: 'whatsapp', label: 'WhatsApp' },
+  { value: 'email', label: 'Email' },
+  { value: 'instagram', label: 'Instagram' },
+  { value: 'facebook', label: 'Facebook' },
+  { value: 'tiktok', label: 'TikTok' },
+  { value: 'direccion', label: 'Dirección' },
+];
+
 function buildDefaultValues(proveedor?: Proveedor): ProveedorFormInput {
   return {
     nombre: proveedor?.nombre ?? '',
     url: proveedor?.url ?? '',
     compraMinima: proveedor?.compraMinima ?? null,
-    whatsapp: proveedor?.whatsapp ?? '',
+    notas: proveedor?.notas ?? '',
     categoriaIds: proveedor?.categorias.map((c) => c.id) ?? [],
+    contactos: proveedor?.contactos.map((c) => ({ tipo: c.tipo, valor: c.valor })) ?? [],
   };
 }
 
@@ -56,6 +70,8 @@ export function FormularioProveedor({
     resolver: zodResolver(proveedorSchema),
     defaultValues: buildDefaultValues(proveedor),
   });
+
+  const { fields, append, remove } = useFieldArray({ control: form.control, name: 'contactos' });
 
   useEffect(() => {
     if (open) {
@@ -106,7 +122,7 @@ export function FormularioProveedor({
                 <FormItem>
                   <FormLabel>URL</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} value={field.value ?? ''} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -130,14 +146,60 @@ export function FormularioProveedor({
                 </FormItem>
               )}
             />
+            <div className="space-y-2">
+              <FormLabel>Contactos</FormLabel>
+              <div className="space-y-2">
+                {fields.map((field, index) => (
+                  <div key={field.id} className="flex gap-2">
+                    <FormField
+                      control={form.control}
+                      name={`contactos.${index}.tipo`}
+                      render={({ field: tipoField }) => (
+                        <Select value={tipoField.value} onValueChange={tipoField.onChange}>
+                          <SelectTrigger className="w-36">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {OPCIONES_TIPO_CONTACTO.map((opcion) => (
+                              <SelectItem key={opcion.value} value={opcion.value}>
+                                {opcion.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name={`contactos.${index}.valor`}
+                      render={({ field: valorField }) => (
+                        <FormItem className="flex-1">
+                          <FormControl>
+                            <Input {...valorField} placeholder="Valor" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button type="button" variant="ghost" size="icon-sm" onClick={() => remove(index)}>
+                      <X />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+              <Button type="button" variant="outline" size="sm" onClick={() => append({ tipo: 'telefono', valor: '' })}>
+                <Plus />
+                Agregar contacto
+              </Button>
+            </div>
             <FormField
               control={form.control}
-              name="whatsapp"
+              name="notas"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>WhatsApp</FormLabel>
+                  <FormLabel>Notas</FormLabel>
                   <FormControl>
-                    <Input {...field} value={field.value ?? ''} />
+                    <Textarea {...field} value={field.value ?? ''} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
