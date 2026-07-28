@@ -23,8 +23,9 @@ const proveedorValido = {
   nombre: 'Mayorista Uno',
   url: 'https://mayorista-uno.com',
   compraMinima: 100,
-  whatsapp: '5491122334455',
+  notas: null,
   categoriaIds: ['c1'],
+  contactos: [{ tipo: 'whatsapp', valor: '5491122334455' }],
 };
 
 describe('crearProveedorAction', () => {

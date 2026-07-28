@@ -16,7 +16,7 @@ describe('proveedoresService', () => {
   });
 
   describe('listar', () => {
-    it('devuelve los proveedores con sus categorías aplanadas', async () => {
+    it('devuelve los proveedores con sus categorías y contactos aplanados', async () => {
       const queryMock = createQueryMock({
         data: [
           {
@@ -24,12 +24,13 @@ describe('proveedoresService', () => {
             nombre: 'Mayorista Uno',
             url: 'https://mayorista-uno.com',
             compra_minima: 100,
-            whatsapp: '5491122334455',
+            notas: 'Cierra a las 17hs',
             created_at: '2026-07-22T00:00:00.000Z',
             proveedor_categorias: [
               { categorias: { id: 'c1', nombre: 'hogar', color: 'amber' } },
               { categorias: { id: 'c2', nombre: 'cocina', color: 'orange' } },
             ],
+            proveedor_contactos: [{ id: 'ct1', tipo: 'whatsapp', valor: '5491122334455' }],
           },
         ],
         error: null,
@@ -47,12 +48,13 @@ describe('proveedoresService', () => {
           nombre: 'Mayorista Uno',
           url: 'https://mayorista-uno.com',
           compraMinima: 100,
-          whatsapp: '5491122334455',
+          notas: 'Cierra a las 17hs',
           createdAt: '2026-07-22T00:00:00.000Z',
           categorias: [
             { id: 'c1', nombre: 'hogar', color: 'amber' },
             { id: 'c2', nombre: 'cocina', color: 'orange' },
           ],
+          contactos: [{ id: 'ct1', tipo: 'whatsapp', valor: '5491122334455' }],
         },
       ]);
     });
@@ -76,9 +78,10 @@ describe('proveedoresService', () => {
           nombre: 'Mayorista Uno',
           url: 'https://mayorista-uno.com',
           compra_minima: 100,
-          whatsapp: '5491122334455',
+          notas: null,
           created_at: '2026-07-22T00:00:00.000Z',
           proveedor_categorias: [{ categorias: { id: 'c1', nombre: 'hogar', color: 'amber' } }],
+          proveedor_contactos: [],
         },
         error: null,
       });
@@ -90,8 +93,9 @@ describe('proveedoresService', () => {
         nombre: 'Mayorista Uno',
         url: 'https://mayorista-uno.com',
         compraMinima: 100,
-        whatsapp: '5491122334455',
+        notas: null,
         categoriaIds: ['c1'],
+        contactos: [],
       });
 
       expect(rpc).toHaveBeenCalledTimes(1);
@@ -99,8 +103,9 @@ describe('proveedoresService', () => {
         p_nombre: 'Mayorista Uno',
         p_url: 'https://mayorista-uno.com',
         p_compra_minima: 100,
-        p_whatsapp: '5491122334455',
+        p_notas: null,
         p_categoria_ids: ['c1'],
+        p_contactos: [],
       });
       expect(from).toHaveBeenCalledWith('proveedores');
       expect(result.id).toBe('p1');
@@ -118,8 +123,9 @@ describe('proveedoresService', () => {
           nombre: 'Mayorista Uno',
           url: 'https://mayorista-uno.com',
           compraMinima: 100,
-          whatsapp: '5491122334455',
+          notas: null,
           categoriaIds: ['c1'],
+          contactos: [],
         })
       ).rejects.toThrow('No se pudo crear el proveedor: fk violation');
 
@@ -137,9 +143,10 @@ describe('proveedoresService', () => {
           nombre: 'Mayorista Uno Actualizado',
           url: 'https://mayorista-uno.com',
           compra_minima: 150,
-          whatsapp: '5491122334455',
+          notas: 'Actualizado por el equipo',
           created_at: '2026-07-22T00:00:00.000Z',
           proveedor_categorias: [{ categorias: { id: 'c2', nombre: 'cocina', color: 'orange' } }],
+          proveedor_contactos: [{ id: 'ct1', tipo: 'whatsapp', valor: '5491122334455' }],
         },
         error: null,
       });
@@ -151,8 +158,9 @@ describe('proveedoresService', () => {
         nombre: 'Mayorista Uno Actualizado',
         url: 'https://mayorista-uno.com',
         compraMinima: 150,
-        whatsapp: '5491122334455',
+        notas: 'Actualizado por el equipo',
         categoriaIds: ['c2'],
+        contactos: [{ tipo: 'whatsapp', valor: '5491122334455' }],
       });
 
       expect(rpc).toHaveBeenCalledTimes(1);
@@ -161,8 +169,9 @@ describe('proveedoresService', () => {
         p_nombre: 'Mayorista Uno Actualizado',
         p_url: 'https://mayorista-uno.com',
         p_compra_minima: 150,
-        p_whatsapp: '5491122334455',
+        p_notas: 'Actualizado por el equipo',
         p_categoria_ids: ['c2'],
+        p_contactos: [{ tipo: 'whatsapp', valor: '5491122334455' }],
       });
       expect(from).toHaveBeenCalledWith('proveedores');
       expect(result.nombre).toBe('Mayorista Uno Actualizado');
@@ -180,8 +189,9 @@ describe('proveedoresService', () => {
           nombre: 'Mayorista Uno Actualizado',
           url: 'https://mayorista-uno.com',
           compraMinima: 150,
-          whatsapp: '5491122334455',
+          notas: null,
           categoriaIds: ['c2'],
+          contactos: [],
         })
       ).rejects.toThrow('No se pudo actualizar el proveedor: fk violation');
 

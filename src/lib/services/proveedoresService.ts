@@ -1,22 +1,24 @@
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { throwOnSupabaseError } from '@/lib/services/supabaseError';
-import type { Categoria, Proveedor, ProveedorInput } from '@/types/proveedor';
+import type { Categoria, Contacto, Proveedor, ProveedorInput } from '@/types/proveedor';
 
 type SupabaseServerClient = ReturnType<typeof createSupabaseServerClient>;
 
 type ProveedorRow = {
   id: string;
   nombre: string;
-  url: string;
+  url: string | null;
   compra_minima: number | null;
-  whatsapp: string | null;
+  notas: string | null;
   created_at: string;
   proveedor_categorias: { categorias: Categoria }[];
+  proveedor_contactos: Contacto[];
 };
 
 const SELECT_CON_CATEGORIAS = `
-  id, nombre, url, compra_minima, whatsapp, created_at,
-  proveedor_categorias ( categorias ( id, nombre, color ) )
+  id, nombre, url, compra_minima, notas, created_at,
+  proveedor_categorias ( categorias ( id, nombre, color ) ),
+  proveedor_contactos ( id, tipo, valor )
 `;
 
 function mapRow(row: ProveedorRow): Proveedor {
@@ -25,9 +27,10 @@ function mapRow(row: ProveedorRow): Proveedor {
     nombre: row.nombre,
     url: row.url,
     compraMinima: row.compra_minima,
-    whatsapp: row.whatsapp,
+    notas: row.notas,
     createdAt: row.created_at,
     categorias: row.proveedor_categorias.map((pc) => pc.categorias),
+    contactos: row.proveedor_contactos,
   };
 }
 
@@ -60,8 +63,9 @@ export const proveedoresService = {
       p_nombre: input.nombre,
       p_url: input.url,
       p_compra_minima: input.compraMinima,
-      p_whatsapp: input.whatsapp,
+      p_notas: input.notas,
       p_categoria_ids: input.categoriaIds,
+      p_contactos: input.contactos,
     });
 
     throwOnSupabaseError(error, 'No se pudo crear el proveedor');
@@ -75,8 +79,9 @@ export const proveedoresService = {
       p_nombre: input.nombre,
       p_url: input.url,
       p_compra_minima: input.compraMinima,
-      p_whatsapp: input.whatsapp,
+      p_notas: input.notas,
       p_categoria_ids: input.categoriaIds,
+      p_contactos: input.contactos,
     });
 
     throwOnSupabaseError(error, 'No se pudo actualizar el proveedor');
