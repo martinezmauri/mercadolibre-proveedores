@@ -15,28 +15,16 @@ export function crearColumnas(categorias: Categoria[]): ColumnDef<Proveedor>[] {
     {
       accessorKey: 'url',
       header: 'URL',
-      cell: ({ row }) => (
-        <a href={row.original.url} target="_blank" rel="noreferrer" className="underline">
-          {row.original.url}
-        </a>
-      ),
+      cell: ({ row }) =>
+        row.original.url ? (
+          <a href={row.original.url} target="_blank" rel="noreferrer" className="underline">
+            {row.original.url}
+          </a>
+        ) : (
+          '—'
+        ),
     },
     { accessorKey: 'compraMinima', header: 'Compra mínima' },
-    {
-      accessorKey: 'whatsapp',
-      header: 'WhatsApp',
-      cell: ({ row }) =>
-        row.original.whatsapp ? (
-          <a
-            href={`https://wa.me/${row.original.whatsapp.replace(/\D/g, '')}`}
-            target="_blank"
-            rel="noreferrer"
-            className="underline"
-          >
-            {row.original.whatsapp}
-          </a>
-        ) : null,
-    },
     {
       id: 'categorias',
       header: 'Categorías',

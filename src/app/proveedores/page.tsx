@@ -1,14 +1,32 @@
 import { Button } from '@/components/ui/button';
 import { FormularioProveedor } from '@/components/proveedores/formulario-proveedor';
 import { TablaProveedores } from '@/components/proveedores/tabla-proveedores';
+import { FiltrosProveedores } from '@/components/proveedores/filtros-proveedores';
+import { PaginadorProveedores } from '@/components/proveedores/paginador-proveedores';
 import { proveedoresService } from '@/lib/services/proveedoresService';
 import { categoriasService } from '@/lib/services/categoriasService';
 
-export default async function ProveedoresPage() {
-  const [proveedores, categorias] = await Promise.all([
-    proveedoresService.listar(),
+const TAMAÑO_PAGINA = 50;
+
+type ProveedoresPageProps = {
+  searchParams: Promise<{ q?: string; categoria?: string; pagina?: string }>;
+};
+
+export default async function ProveedoresPage({ searchParams }: ProveedoresPageProps) {
+  const params = await searchParams;
+  const pagina = Math.max(1, Number(params.pagina) || 1);
+
+  const [{ proveedores, total }, categorias] = await Promise.all([
+    proveedoresService.buscar({
+      pagina,
+      tamañoPagina: TAMAÑO_PAGINA,
+      busqueda: params.q ?? null,
+      categoriaId: params.categoria ?? null,
+    }),
     categoriasService.listar(),
   ]);
+
+  const totalPaginas = Math.max(1, Math.ceil(total / TAMAÑO_PAGINA));
 
   return (
     <main className="space-y-6 p-4 sm:p-6">
@@ -21,7 +39,9 @@ export default async function ProveedoresPage() {
         </div>
         <FormularioProveedor categorias={categorias} trigger={<Button>Nuevo proveedor</Button>} />
       </div>
+      <FiltrosProveedores categorias={categorias} />
       <TablaProveedores proveedores={proveedores} categorias={categorias} />
+      <PaginadorProveedores paginaActual={pagina} totalPaginas={totalPaginas} />
     </main>
   );
 }
