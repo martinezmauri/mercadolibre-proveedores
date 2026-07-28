@@ -230,4 +230,96 @@ describe('proveedoresService', () => {
       );
     });
   });
+
+  describe('buscar', () => {
+    it('busca por nombre con paginación', async () => {
+      const queryMock = createQueryMock({
+        data: [
+          {
+            id: 'p1',
+            nombre: 'Mayorista Uno',
+            url: null,
+            compra_minima: null,
+            notas: null,
+            created_at: '2026-07-27T00:00:00.000Z',
+            proveedor_categorias: [],
+            proveedor_contactos: [],
+          },
+        ],
+        error: null,
+        count: 1,
+      });
+      const from = vi.fn().mockReturnValue(queryMock);
+      mockedCreateClient.mockReturnValue({ from });
+
+      const result = await proveedoresService.buscar({
+        pagina: 1,
+        tamañoPagina: 50,
+        busqueda: 'Mayorista',
+        categoriaId: null,
+      });
+
+      expect(from).toHaveBeenCalledWith('proveedores');
+      expect(queryMock.ilike).toHaveBeenCalledWith('nombre', '%Mayorista%');
+      expect(queryMock.range).toHaveBeenCalledWith(0, 49);
+      expect(result.total).toBe(1);
+      expect(result.proveedores).toHaveLength(1);
+      expect(result.proveedores[0].nombre).toBe('Mayorista Uno');
+    });
+
+    it('calcula el rango correcto para páginas mayores a 1', async () => {
+      const queryMock = createQueryMock({ data: [], error: null, count: 0 });
+      const from = vi.fn().mockReturnValue(queryMock);
+      mockedCreateClient.mockReturnValue({ from });
+
+      await proveedoresService.buscar({ pagina: 3, tamañoPagina: 50, busqueda: null, categoriaId: null });
+
+      expect(queryMock.range).toHaveBeenCalledWith(100, 149);
+      expect(queryMock.ilike).not.toHaveBeenCalled();
+    });
+
+    it('filtra por categoría resolviendo los proveedor_id primero', async () => {
+      const categoriaQuery = createQueryMock({ data: [{ proveedor_id: 'p1' }], error: null });
+      const proveedoresQuery = createQueryMock({
+        data: [
+          {
+            id: 'p1',
+            nombre: 'Mayorista Uno',
+            url: null,
+            compra_minima: null,
+            notas: null,
+            created_at: '2026-07-27T00:00:00.000Z',
+            proveedor_categorias: [],
+            proveedor_contactos: [],
+          },
+        ],
+        error: null,
+        count: 1,
+      });
+      const from = vi.fn().mockReturnValueOnce(categoriaQuery).mockReturnValueOnce(proveedoresQuery);
+      mockedCreateClient.mockReturnValue({ from });
+
+      const result = await proveedoresService.buscar({
+        pagina: 1,
+        tamañoPagina: 50,
+        busqueda: null,
+        categoriaId: 'c1',
+      });
+
+      expect(from).toHaveBeenNthCalledWith(1, 'proveedor_categorias');
+      expect(categoriaQuery.eq).toHaveBeenCalledWith('categoria_id', 'c1');
+      expect(from).toHaveBeenNthCalledWith(2, 'proveedores');
+      expect(proveedoresQuery.in).toHaveBeenCalledWith('id', ['p1']);
+      expect(result.total).toBe(1);
+    });
+
+    it('lanza un error legible si Supabase falla', async () => {
+      const from = vi.fn().mockReturnValue(createQueryMock({ data: null, error: { message: 'timeout' }, count: null }));
+      mockedCreateClient.mockReturnValue({ from });
+
+      await expect(
+        proveedoresService.buscar({ pagina: 1, tamañoPagina: 50, busqueda: null, categoriaId: null })
+      ).rejects.toThrow('No se pudieron buscar los proveedores: timeout');
+    });
+  });
 });

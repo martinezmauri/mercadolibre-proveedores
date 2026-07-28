@@ -57,6 +57,55 @@ export const proveedoresService = {
     return (data as unknown as ProveedorRow[]).map(mapRow);
   },
 
+  async buscar({
+    pagina,
+    tamañoPagina,
+    busqueda,
+    categoriaId,
+  }: {
+    pagina: number;
+    tamañoPagina: number;
+    busqueda: string | null;
+    categoriaId: string | null;
+  }): Promise<{ proveedores: Proveedor[]; total: number }> {
+    const supabase = createSupabaseServerClient();
+    const desde = (pagina - 1) * tamañoPagina;
+    const hasta = desde + tamañoPagina - 1;
+
+    let idsPorCategoria: string[] | null = null;
+    if (categoriaId) {
+      const { data, error } = await supabase
+        .from('proveedor_categorias')
+        .select('proveedor_id')
+        .eq('categoria_id', categoriaId);
+
+      throwOnSupabaseError(error, 'No se pudieron buscar los proveedores');
+      idsPorCategoria = (data ?? []).map((fila: { proveedor_id: string }) => fila.proveedor_id);
+    }
+
+    let query = supabase
+      .from('proveedores')
+      .select(SELECT_CON_CATEGORIAS, { count: 'exact' })
+      .order('created_at', { ascending: false })
+      .range(desde, hasta);
+
+    if (busqueda) {
+      query = query.ilike('nombre', `%${busqueda}%`);
+    }
+
+    if (idsPorCategoria !== null) {
+      query = query.in('id', idsPorCategoria);
+    }
+
+    const { data, error, count } = await query;
+
+    throwOnSupabaseError(error, 'No se pudieron buscar los proveedores');
+    return {
+      proveedores: (data as unknown as ProveedorRow[]).map(mapRow),
+      total: count ?? 0,
+    };
+  },
+
   async crear(input: ProveedorInput): Promise<Proveedor> {
     const supabase = createSupabaseServerClient();
     const { data: id, error } = await supabase.rpc('crear_proveedor', {
